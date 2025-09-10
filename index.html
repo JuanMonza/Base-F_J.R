@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Formulario Afiliados</title>
+    <link rel="icon" type="image/x-icon" href="/Logos_2025/favicon.ico" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css" />
+    <link rel="stylesheet" href="style_58.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
+    <div class="page-content-wrapper">
+        <div class="container">
+            <img src="/Logos_2025/logo.png" alt="Logo Jardines del Renacer" class="logo" />
+            <h1>Formulario de Actualización de Afiliados</h1>
+            <p>Complete la siguiente información</p>
+
+            <!-- Botón inicial -->
+            <button id="showFormBtn">Llenar información</button>
+
+            <!-- Formulario (oculto al inicio) -->
+            <form id="form" class="hidden">
+                <label>Nombres y Apellidos</label>
+                <input type="text" name="nombre" required />
+
+                <label>Tipo de Documento</label>
+                <select name="tipo_documento" id="tipo_documento" required>
+                    <option value="">Seleccione Tipo...</option>
+                    <option value="CC">Cédula de Ciudadanía</option>
+                    <option value="TI">Tarjeta de Identidad</option>
+                    <option value="CE">Cédula de Extranjería</option>
+                    <option value="PA">Pasaporte</option>
+                </select>
+                <label>Número de Documento</label>
+                <input type="text" name="numero_documento" required />
+
+                <label>Fecha de expedición del documento</label>
+                <input type="date" name="fecha_expedicion" required />
+
+                <label>Fecha de nacimiento</label>
+                <input type="date" name="fecha_nacimiento" required />
+
+                <label>Departamento y Ciudad de Nacimiento</label>
+                <select name="departamento" id="departamento" required>
+                    <option value="">Seleccione Departamento...</option>
+                </select>
+                <select name="ciudad" id="ciudad" required>
+                    <option value="">Seleccione Ciudad...</option>
+                </select>
+
+                <label>Dirección de residencia</label>
+                <input type="text" name="direccion" required />
+
+                <label>Número de teléfono principal</label>
+                <input type="tel" name="telefono_principal" required pattern="[0-9]{7,10}" placeholder="Ej: 3001234567" />
+
+                <label>Número de teléfono (familiar)</label>
+                <input type="tel" name="telefono_familiar" required pattern="[0-9]{7,10}" placeholder="Ej: 3109876543" />
+
+                <label>Correo electrónico</label>
+                <input type="email" name="correo" required />
+
+                <label>Estado civil</label>
+                <select name="estado_civil" required>
+                    <option value="">Seleccione...</option>
+                    <option value="Soltero">Soltero(a)</option>
+                    <option value="Casado">Casado(a)</option>
+                </select>
+                <label>Ocupación actual</label>
+                <select name="ocupacion" required>
+                    <option value="">Seleccione...</option>
+                    <option value="Empleado">Empleado(a)</option>
+                    <option value="Independiente">Independiente</option>
+                    <option value="Hogar">Hogar</option>
+                    <option value="Pensionado">Pensionado(a)</option>
+                    <option value="Otro">Otro</option>
+                </select>
+                <label>¿Actualmente recibe ingresos de pensión?</label>
+                <select name="recibe_pension" required>
+                    <option value="">Seleccione...</option>
+                    <option value="Si">Sí</option>
+                    <option value="No">No</option>
+                    <option value="En trámite">En trámite</option>
+                    <option value="Sustitución">Sustitución pensional</option>
+                </select>
+                <label>En caso de estar pensionado(a), su pensión corresponde a:</label>
+                <select name="fondo_pension" required>
+                    <option value="">Seleccione...</option>
+                    <option value="Protección">Protección</option>
+                    <option value="Porvenir">Porvenir</option>
+                    <option value="Colfondos">Colfondos</option>
+                    <option value="Skandia">Skandia</option>
+                    <option value="Colpensiones">Colpensiones</option>
+                    <option value="Magisterio">Magisterio</option>
+                    <option value="Fuerza Pública">Fuerza Pública</option>
+                    <option value="No recuerdo">No recuerdo</option>
+                    <option value="Otro">Otro</option>
+                </select>
+                <label>¿Tiene familiares viviendo en el extranjero?</label>
+                <select name="familia_extranjero" required>
+                    <option value="">Seleccione...</option>
+                    <option value="Si">Sí</option>
+                    <option value="No">No</option>
+                </select>
+                <label>¿Tiene alguna mascota en casa?</label>
+                <select name="mascota" required>
+                    <option value="">Seleccione...</option>
+                    <option value="Si">Sí</option>
+                    <option value="No">No</option>
+                </select>
+                <label for="privacidad" style="display: inline-block; margin-top: 15px">
+                    <input type="checkbox" name="privacidad" id="privacidad" required />
+                    Acepto la política de privacidad
+                </label>
+                <button type="submit">Enviar</button>
+                <div id="msg" class="msg"></div>
+            </form>
+        </div>
+
+        <!-- Pop-up del Sorteo -->
+        <div id="giveaway-popup" class="hidden">
+            <button id="close-popup-btn" aria-label="Cerrar">&times;</button>
+            <div class="popup-content">
+                <img src="/Logos_2025/Sorteo.jpg" alt="Sorteo" class="popup-image">
+                <div class="popup-text">
+                    <h2>¡Participa y Gana!</h2>
+                    <p>Actualiza tus datos y participa en el sorteo de un smartphone.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <canvas id="granim-canvas"></canvas>
+        <div class="footer-content">
+            <p>&copy; 2025 Jardines del Renacer.</p>
+            <div class="social-links">
+                <a href="https://www.facebook.com/jardinesdelrenacer" target="_blank" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                <a href="https://www.instagram.com/jardinesdelrenacer" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                <a href="https://www.jardinesdelrenacer.com" target="_blank" aria-label="Sitio Web"><i class="fas fa-globe"></i></a>
+            </div>
+            <p>Creado por Juan Monsalve. Versión 2.5</p>
+            <p>
+                <a href="#">Términos</a> |
+                <a href="#">Condiciones</a> |
+                <a href="#">Cookies</a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Scripts de librerías externas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/es.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/granim/2.0.0/granim.min.js"></script>
+    <!-- Nuestro script personalizado -->
+    <script src="script.js" defer></script>
+</body>
+
+</html>
