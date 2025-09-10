@@ -26,8 +26,16 @@
                 <label>Nombres y Apellidos</label>
                 <input type="text" name="nombre" required />
 
-                <label>Número de documento</label>
-                <input type="text" name="documento" required />
+                <label>Tipo de Documento</label>
+                <select name="tipo_documento" id="tipo_documento" required>
+                    <option value="">Seleccione Tipo...</option>
+                    <option value="CC">Cédula de Ciudadanía</option>
+                    <option value="TI">Tarjeta de Identidad</option>
+                    <option value="CE">Cédula de Extranjería</option>
+                    <option value="PA">Pasaporte</option>
+                </select>
+                <label>Número de Documento</label>
+                <input type="text" name="numero_documento" required />
 
                 <label>Fecha de expedición del documento</label>
                 <input type="date" name="fecha_expedicion" required />
@@ -35,8 +43,13 @@
                 <label>Fecha de nacimiento</label>
                 <input type="date" name="fecha_nacimiento" required />
 
-                <label>Lugar de nacimiento (Ciudad / Departamento)</label>
-                <input type="text" name="lugar_nacimiento" required />
+                <label>Departamento y Ciudad de Nacimiento</label>
+                <select name="departamento" id="departamento" required>
+                    <option value="">Seleccione Departamento...</option>
+                </select>
+                <select name="ciudad" id="ciudad" required>
+                    <option value="">Seleccione Ciudad...</option>
+                </select>
 
                 <label>Dirección de residencia</label>
                 <input type="text" name="direccion" required />
@@ -45,7 +58,7 @@
                 <input type="tel" name="telefono_principal" required pattern="[0-9]{7,10}" placeholder="Ej: 3001234567" />
 
                 <label>Número de teléfono (familiar)</label>
-                <input type="tel" name="telefono_familiar" pattern="[0-9]{7,10}" placeholder="Ej: 3109876543" />
+                <input type="tel" name="telefono_familiar" required pattern="[0-9]{7,10}" placeholder="Ej: 3109876543" />
 
                 <label>Correo electrónico</label>
                 <input type="email" name="correo" required />
@@ -74,7 +87,7 @@
                     <option value="Sustitución">Sustitución pensional</option>
                 </select>
                 <label>En caso de estar pensionado(a), su pensión corresponde a:</label>
-                <select name="fondo_pension">
+                <select name="fondo_pension" required>
                     <option value="">Seleccione...</option>
                     <option value="Protección">Protección</option>
                     <option value="Porvenir">Porvenir</option>

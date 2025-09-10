@@ -1,12 +1,115 @@
 // Se espera a que todo el contenido del HTML esté cargado antes de ejecutar el script.
 document.addEventListener('DOMContentLoaded', () => {
 
+    // --- INICIALIZACIÓN DE GRANIM.JS PARA EL FOOTER ---
+    // Crea una nueva instancia de Granim para animar el fondo del footer.
+    new Granim({
+        element: '#granim-canvas', // ID del elemento canvas en el HTML.
+        direction: 'left-right',   // Dirección de la animación del degradado.
+        states : {
+            "default-state": {
+                gradients: [
+                    ['#2C3E50', '#3498DB'], // Degradado 1: Azul oscuro a Azul claro
+                    ['#3498DB', '#8E44AD'], // Degradado 2: Azul claro a Morado
+                    ['#8E44AD', '#2C3E50']  // Degradado 3: Morado a Azul oscuro
+                ],
+                transitionSpeed: 5000 // Velocidad de transición entre degradados (5 segundos).
+            }
+        }
+    });
+
     // --- ELEMENTOS DEL DOM ---
     const showBtn = document.getElementById("showFormBtn");
     const form = document.getElementById("form");
     const msg = document.getElementById("msg");
     const giveawayPopup = document.getElementById("giveaway-popup");
     const closePopupBtn = document.getElementById("close-popup-btn");
+
+    // --- LÓGICA DE DEPARTAMENTOS Y CIUDADES ---
+    // Datos de ejemplo para departamentos y ciudades (puedes expandir esta lista).
+    const colombianLocations = {
+        "Antioquia": ["Medellín", "Envigado", "Itagüí"],
+        "Cundinamarca": ["Bogotá", "Chía", "Soacha"],
+        "Valle del Cauca": ["Cali", "Palmira", "Buga"],
+        "Atlántico": ["Barranquilla", "Soledad", "Malambo"]
+    };
+
+    const departamentoSelect = document.getElementById('departamento');
+    const ciudadSelect = document.getElementById('ciudad');
+
+    // Función para poblar el selector de departamentos.
+    function populateDepartamentos() {
+        for (const departamento in colombianLocations) {
+            const option = document.createElement('option');
+            option.value = departamento;
+            option.textContent = departamento;
+            departamentoSelect.appendChild(option);
+        }
+    }
+
+    // Función para poblar el selector de ciudades según el departamento seleccionado.
+    function populateCiudades(selectedDepartamento) {
+        ciudadSelect.innerHTML = '<option value="">Seleccione Ciudad...</option>'; // Limpiar y añadir opción por defecto
+        if (selectedDepartamento && colombianLocations[selectedDepartamento]) {
+            colombianLocations[selectedDepartamento].forEach(ciudad => {
+                const option = document.createElement('option');
+                option.value = ciudad;
+                option.textContent = ciudad;
+                ciudadSelect.appendChild(option);
+            });
+        }
+    }
+
+    // Evento para cuando cambia el departamento seleccionado.
+    departamentoSelect.addEventListener('change', (event) => {
+        populateCiudades(event.target.value);
+    });
+
+    // Poblar departamentos al cargar la página.
+    populateDepartamentos();
+
+    // --- LÓGICA DE VALIDACIÓN DE DOCUMENTO ---
+    const tipoDocumentoSelect = document.getElementById('tipo_documento');
+    const numeroDocumentoInput = document.getElementById('numero_documento');
+
+    function applyDocumentValidation() {
+        const selectedType = tipoDocumentoSelect.value;
+        numeroDocumentoInput.value = ''; // Limpiar el campo al cambiar el tipo
+        numeroDocumentoInput.placeholder = ''; // Limpiar placeholder
+
+        switch (selectedType) {
+            case 'CC':
+                numeroDocumentoInput.setAttribute('pattern', '[0-9]{5,15}'); // 5 a 15 dígitos
+                numeroDocumentoInput.setAttribute('title', 'Solo números (5 a 15 dígitos)');
+                numeroDocumentoInput.placeholder = 'Ej: 123456789';
+                numeroDocumentoInput.type = 'text'; // Mantener como texto para evitar problemas con ceros iniciales
+                break;
+            case 'PA':
+                numeroDocumentoInput.setAttribute('pattern', '[A-Za-z0-9]{6,20}'); // Alfanumérico, 6 a 20 caracteres
+                numeroDocumentoInput.setAttribute('title', 'Letras y números (6 a 20 caracteres)');
+                numeroDocumentoInput.placeholder = 'Ej: ABC123456';
+                numeroDocumentoInput.type = 'text';
+                break;
+            case 'TI': // Tarjeta de Identidad
+            case 'CE': // Cédula de Extranjería
+                numeroDocumentoInput.setAttribute('pattern', '[A-Za-z0-9]{5,20}'); // Alfanumérico, 5 a 20 caracteres
+                numeroDocumentoInput.setAttribute('title', 'Letras y números (5 a 20 caracteres)');
+                numeroDocumentoInput.placeholder = 'Ej: 1000123456 o ABC12345';
+                numeroDocumentoInput.type = 'text';
+                break;
+            default:
+                numeroDocumentoInput.removeAttribute('pattern');
+                numeroDocumentoInput.removeAttribute('title');
+                numeroDocumentoInput.placeholder = '';
+                numeroDocumentoInput.type = 'text';
+                break;
+        }
+    }
+
+    // Aplicar validación al cargar la página y al cambiar el tipo de documento
+    tipoDocumentoSelect.addEventListener('change', applyDocumentValidation);
+    // Llamar una vez al inicio para establecer la validación inicial si hay un valor por defecto
+    applyDocumentValidation();
 
     // --- LÓGICA DEL POP-UP DEL SORTEO ---
     // 1. Revisar el contador de vistas desde la memoria del navegador.
@@ -46,13 +149,22 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
         msg.textContent = "Enviando...";
-        const data = new FormData(form);
+        
+        // Convertir FormData a un objeto JSON
+        const formData = new FormData(form);
+        const jsonData = {};
+        formData.forEach((value, key) => {
+            jsonData[key] = value;
+        });
 
         try {
-            // ¡IMPORTANTE! Debes reemplazar "https://TU_BACKEND/api/submit" por la URL real de tu servidor.
-            const res = await fetch("https://TU_BACKEND/api/submit", {
+            // Enviar los datos como JSON a la función serverless de Netlify
+            const res = await fetch("/.netlify/functions/submit-form", { // URL de la función Netlify
                 method: "POST",
-                body: data
+                headers: {
+                    "Content-Type": "application/json" // Indicar que estamos enviando JSON
+                },
+                body: JSON.stringify(jsonData) // Convertir el objeto JSON a string
             });
 
             if (res.ok) {

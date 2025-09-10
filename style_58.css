@@ -228,6 +228,7 @@ button[type="submit"]:hover {
 
 /* --- Estilos para el Footer --- */
 footer {
+    position: relative; /* Necesario para posicionar el canvas */
     text-align: center;
     padding: 20px;
     margin-top: 40px;
@@ -235,6 +236,26 @@ footer {
     color: var(--white);
     font-size: 14px;
     line-height: 1.5;
+    overflow: hidden; /* Para que el canvas no se salga */
+}
+
+#granim-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* Asegura que el canvas esté detrás del contenido del footer */
+}
+
+.footer-content {
+    position: relative; /* Asegura que el contenido esté sobre el canvas */
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%; /* Ocupa toda la altura del footer */
 }
 
 footer p {
