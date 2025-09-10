@@ -1,0 +1,299 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap');
+
+:root {
+    --primary-color: #005A9C; /* Azul Principal */
+    --primary-color-dark: #004070; /* Azul más oscuro para hover */
+    --accent-color: #3a37d4; /* Dorado */
+    --accent-color-dark: #3230b8;
+    --focus-color: #007BFF; /* Azul Acento para foco */
+    --text-color: #1d1d1d; /* Gris Oscuro */
+    --text-color-light: #323232;
+    --background-color: #f8f9fa; /* Gris Suave */
+    --container-background: #ffffff;
+    --border-color: #ccc;
+    --white: #fff;
+}
+
+body {
+    font-family: 'Lato', sans-serif;
+    margin: 0;
+    padding: 0;
+    color: var(--text-color);
+    line-height: 1.6;
+    display: flex; /* Habilitar Flexbox */
+    flex-direction: column; /* Elementos en columna */
+    min-height: 100vh; /* Ocupar al menos el 100% de la altura de la ventana */
+
+    /* Fondo con imagen y filtro oscuro */
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/Logos_2025/parque.png');
+    background-size: cover;
+    background-position: center center;
+    background-attachment: fixed;
+}
+
+.page-content-wrapper {
+    flex-grow: 1; /* Permite que el contenido principal crezca y empuje el footer */
+    display: flex; /* Habilitar Flexbox para centrar el contenido */
+    flex-direction: column; /* Elementos en columna */
+    justify-content: center; /* Centrado vertical */
+    align-items: center; /* Centrado horizontal */
+    padding: 20px; /* Añadir un poco de padding para evitar que el contenido toque los bordes */
+}
+
+.container {
+    max-width: 450px; /* Reducimos el ancho máximo */
+    margin: 30px auto;
+    padding: 25px;
+    background: rgba(255, 255, 255, 0.9); /* Blanco con 90% de opacidad */
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.07);
+}
+
+.logo {
+    display: block;
+    margin: 0 auto 20px auto;
+    max-width: 180px;
+}
+
+h1 {
+    font-size: 24px;
+    text-align: center;
+    margin-bottom: 10px;
+    color: var(--primary-color);
+    font-weight: 700;
+}
+
+p {
+    text-align: center;
+    color: var(--text-color-light);
+    margin-bottom: 25px;
+    font-size: 16px;
+}
+
+label {
+    display: block;
+    font-size: 15px;
+    margin: 12px 0 6px;
+    color: var(--text-color);
+    font-weight: 700;
+}
+
+input,
+select {
+    width: 100%;
+    padding: 12px;
+    font-size: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-sizing: border-box;
+    background-color: #fdfdfd;
+}
+
+input:focus,
+select:focus {
+    border-color: var(--focus-color);
+    outline: none;
+    box-shadow: 0 0 6px rgba(0, 123, 255, 0.4);
+}
+
+button {
+    margin-top: 20px;
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.1s;
+}
+
+button:hover {
+    transform: translateY(-2px);
+}
+
+/* Botón de envío */
+button[type="submit"] {
+    background: var(--primary-color);
+}
+
+button[type="submit"]:hover {
+    background: var(--primary-color-dark);
+}
+
+/* Botón para mostrar formulario */
+#showFormBtn {
+    background: var(--accent-color);
+    color: #000;
+}
+
+#showFormBtn:hover {
+    background: var(--accent-color-dark);
+}
+
+
+.msg {
+    margin-top: 16px;
+    font-size: 15px;
+    text-align: center;
+}
+
+
+.hidden {
+    display: none;
+}
+
+/* --- Estilos para el Pop-up del Sorteo --- */
+#giveaway-popup {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 320px;
+    background-color: var(--container-background);
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    z-index: 1000;
+    overflow: hidden;
+    font-family: 'Lato', sans-serif;
+    animation: slideInUp 0.6s ease-out;
+}
+
+.popup-content {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+}
+
+.popup-image {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.popup-text {
+    margin-left: 15px;
+}
+
+#giveaway-popup h2 {
+    margin: 0 0 5px 0;
+    font-size: 18px;
+    color: var(--primary-color);
+}
+
+#giveaway-popup p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-color-light);
+    text-align: left;
+}
+
+#close-popup-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 30px;
+    height: 30px;
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    line-height: 30px;
+    color: #aaa;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+    text-align: center;
+}
+
+#close-popup-btn:hover {
+    color: #333;
+    transform: none; /* Anular el transform de otros botones */
+}
+
+/* Animación de entrada */
+@keyframes slideInUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+
+
+/* --- Estilos para el Footer --- */
+footer {
+    text-align: center;
+    padding: 20px;
+    margin-top: 40px;
+    background: linear-gradient(to right, #2C3E50, #3498DB, #8E44AD); /* Degradado de azul oscuro a morado */
+    color: var(--white);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+footer p {
+    margin: 5px 0;
+    color: var(--white); /* Asegurar que el texto sea blanco */
+}
+
+footer a {
+    color: var(--white);
+    text-decoration: none;
+    margin: 0 5px;
+    transition: color 0.3s ease;
+}
+
+footer a:hover {
+    color: var(--focus-color); /* Usar el color de foco para el hover */
+}
+
+.social-links {
+    margin-top: 15px;
+    margin-bottom: 10px;
+}
+
+.social-links a {
+    display: inline-block;
+    width: 35px;
+    height: 35px;
+    line-height: 35px;
+    font-size: 18px;
+    margin: 0 8px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--white);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.social-links a:hover {
+    background-color: var(--focus-color); /* Usar el color de foco para el hover */
+    color: var(--primary-color-dark); /* Color del icono al hacer hover */
+}
+
+@media (max-width: 600px) {
+    .container {
+        margin: 15px;
+        padding: 15px;
+    }
+
+    h1 {
+        font-size: 22px;
+    }
+
+    button {
+        font-size: 15px;
+        padding: 12px;
+    }
+
+    input,
+    select {
+        font-size: 14px;
+        padding: 10px;
+    }
+}
