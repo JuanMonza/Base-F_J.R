@@ -1,6 +1,5 @@
 // Se espera a que todo el contenido del HTML esté cargado antes de ejecutar el script.
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM Content Loaded. Script is running.'); // Added log
 
     // --- INICIALIZACIÓN DE GRANIM.JS PARA EL FOOTER ---
     // Crea una nueva instancia de Granim para animar el fondo del footer.
@@ -110,11 +109,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Aplicar validación al cargar la página y al cambiar el tipo de documento
-    tipoDocumentoSelect.addEventListener('change', applyDocumentValidation);
-    // Llamar una vez al inicio para establecer la validación inicial si hay un valor por defecto
-    applyDocumentValidation();
-
     // --- LÓGICA DEL POP-UP DEL SORTEO ---
     // 1. Revisar el contador de vistas desde la memoria del navegador.
     let viewCount = parseInt(localStorage.getItem('popupViewCount')) || 0;
@@ -148,6 +142,10 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Show Form Button clicked!'); // Added log
         form.classList.remove("hidden");
         showBtn.classList.add("hidden");
+
+        // Call validation logic here, after the form is visible
+        applyDocumentValidation(); // Initial call
+        tipoDocumentoSelect.addEventListener('change', applyDocumentValidation); // Event listener
     });
 
     // --- EVENTO PARA MANEJAR EL ENVÍO DEL FORMULARIO ---
