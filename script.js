@@ -1,5 +1,6 @@
 // Se espera a que todo el contenido del HTML esté cargado antes de ejecutar el script.
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM Content Loaded. Script is running.'); // Added log
 
     // --- INICIALIZACIÓN DE GRANIM.JS PARA EL FOOTER ---
     // Crea una nueva instancia de Granim para animar el fondo del footer.
@@ -24,6 +25,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const msg = document.getElementById("msg");
     const giveawayPopup = document.getElementById("giveaway-popup");
     const closePopupBtn = document.getElementById("close-popup-btn");
+
+    console.log('showBtn:', showBtn); // Added log
+    console.log('form:', form);       // Added log
 
     // --- LÓGICA DE DEPARTAMENTOS Y CIUDADES ---
     // Datos de ejemplo para departamentos y ciudades (puedes expandir esta lista).
@@ -141,6 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- EVENTO PARA MOSTRAR EL FORMULARIO ---
     showBtn.addEventListener("click", () => {
+        console.log('Show Form Button clicked!'); // Added log
         form.classList.remove("hidden");
         showBtn.classList.add("hidden");
     });
