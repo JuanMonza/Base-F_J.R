@@ -59,8 +59,17 @@
                 <label>Número de teléfono (familiar)</label>
                 <input type="tel" name="telefono_familiar" required pattern="[0-9]{7,10}" placeholder="Ej: 3109876543" />
 
-                <label>Correo electrónico</label>
-                <input type="email" name="correo" required />
+                <label>¿Tiene correo electrónico?</label>
+                <select name="tiene_correo" id="tiene_correo" required>
+                    <option value="">Seleccione...</option>
+                    <option value="Si">Sí</option>
+                    <option value="No">No</option>
+                </select>
+
+                <div id="correo-container" style="display: none;">
+                    <label>Correo electrónico</label>
+                    <input type="email" name="correo" id="correo" />
+                </div>
 
                 <label>Estado civil</label>
                 <select name="estado_civil" required>
@@ -81,26 +90,28 @@
                     <option value="Otro">Otro</option>
                 </select>
                 <label>¿Actualmente recibe ingresos de pensión?</label>
-                <select name="recibe_pension" required>
+                <select name="recibe_pension" id="recibe_pension" required>
                     <option value="">Seleccione...</option>
                     <option value="Si">Sí</option>
                     <option value="No">No</option>
                     <option value="En trámite">En trámite</option>
                     <option value="Sustitución">Sustitución pensional</option>
                 </select>
-                <label>En caso de estar pensionado(a), su pensión corresponde a:</label>
-                <select name="fondo_pension" required>
-                    <option value="">Seleccione...</option>
-                    <option value="Protección">Protección</option>
-                    <option value="Porvenir">Porvenir</option>
-                    <option value="Colfondos">Colfondos</option>
-                    <option value="Skandia">Skandia</option>
-                    <option value="Colpensiones">Colpensiones</option>
-                    <option value="Magisterio">Magisterio</option>
-                    <option value="Fuerza Pública">Fuerza Pública</option>
-                    <option value="No recuerdo">No recuerdo</option>
-                    <option value="Otro">Otro</option>
-                </select>
+                <div id="fondo-pension-container" style="display: none;">
+                    <label>En caso de estar pensionado(a), su pensión corresponde a:</label>
+                    <select name="fondo_pension" id="fondo_pension">
+                        <option value="">Seleccione...</option>
+                        <option value="Protección">Protección</option>
+                        <option value="Porvenir">Porvenir</option>
+                        <option value="Colfondos">Colfondos</option>
+                        <option value="Skandia">Skandia</option>
+                        <option value="Colpensiones">Colpensiones</option>
+                        <option value="Magisterio">Magisterio</option>
+                        <option value="Fuerza Pública">Fuerza Pública</option>
+                        <option value="No recuerdo">No recuerdo</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                </div>
                 <label>¿Tiene familiares viviendo en el extranjero?</label>
                 <select name="familia_extranjero" required>
                     <option value="">Seleccione...</option>
@@ -144,12 +155,13 @@
                 <a href="https://www.instagram.com/jardinesdelrenacer" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
                 <a href="https://www.jardinesdelrenacer.com" target="_blank" aria-label="Sitio Web"><i class="fas fa-globe"></i></a>
             </div>
-            <p>Creado por Juan Monsalve. Versión 2.5</p>
+            <p>Creado por Juan Monsalve</p>
             <p>
                 <a href="#">Términos</a> |
                 <a href="#">Condiciones</a> |
                 <a href="#">Cookies</a>
             </p>
+            <p>Versión 2.5</p>
         </div>
     </footer>
 
