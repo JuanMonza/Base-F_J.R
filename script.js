@@ -169,15 +169,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- LÓGICA DEL POP-UP DEL SORTEO ---
-    let viewCount = parseInt(localStorage.getItem('popupViewCount')) || 0;
-
-    if (viewCount < 2) {
-        setTimeout(() => {
-            giveawayPopup.classList.remove('hidden');
-            localStorage.setItem('popupViewCount', viewCount + 1);
-        }, 3000);
-    }
+    // --- LÓGICA DEL POP-UP DE BIENVENIDA ---
+    giveawayPopup.classList.remove('hidden'); // Show immediately
 
     closePopupBtn.addEventListener("click", () => {
         giveawayPopup.classList.add("hidden");
