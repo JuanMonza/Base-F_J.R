@@ -27,6 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const successModal = document.getElementById("success-modal");
     const modalMessage = document.getElementById("modal-message");
     const closeModalBtn = document.getElementById("close-modal-btn");
+    const modalIcon = document.querySelector(".modal-icon");
+    const modalIconI = document.getElementById("modal-icon-i");
 
     // --- LÓGICA DE DEPARTAMENTOS Y CIUDADES ---
     const colombianLocations = {
@@ -182,7 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     closeModalBtn.addEventListener("click", () => {
-        successModal.style.display = "none";
+        successModal.classList.remove("visible");
     });
 
     // --- INICIALIZACIÓN DE FLATPCIKR ---
@@ -250,18 +252,24 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (res.ok) {
-                modalMessage.textContent = "✅ Datos actualizados correctamente";
-                successModal.style.display = "flex";
+                modalMessage.textContent = "¡Datos actualizados correctamente!";
+                modalIcon.className = "modal-icon success";
+                modalIconI.className = "fas fa-check";
+                successModal.classList.add("visible");
                 form.reset();
                 msg.textContent = "";
             } else {
-                modalMessage.textContent = "❌ Error al enviar datos";
-                successModal.style.display = "flex";
+                modalMessage.textContent = "Error al enviar los datos";
+                modalIcon.className = "modal-icon error";
+                modalIconI.className = "fas fa-times";
+                successModal.classList.add("visible");
             }
         } catch (error) {
             console.error('Error en la conexión:', error);
-            modalMessage.textContent = "⚠️ Error de conexión";
-            successModal.style.display = "flex";
+            modalMessage.textContent = "Error de conexión";
+            modalIcon.className = "modal-icon error";
+            modalIconI.className = "fas fa-exclamation-triangle";
+            successModal.classList.add("visible");
         }
     });
 
