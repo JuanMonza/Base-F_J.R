@@ -23,16 +23,15 @@
 
             <!-- Formulario (oculto al inicio) -->
             <form id="form" class="hidden">
-                <label>Nombres y Apellidos</label>
+                <label>Nombres y Apellidos (Completos)</label>
                 <input type="text" name="nombre" required />
 
                 <label>Tipo de Documento</label>
                 <select name="tipo_documento" id="tipo_documento" required>
                     <option value="">Seleccione Tipo...</option>
                     <option value="CC">Cédula de Ciudadanía</option>
-                    <option value="TI">Tarjeta de Identidad</option>
+                    <option value="PEP">P.E.P</option>
                     <option value="CE">Cédula de Extranjería</option>
-                    <option value="PA">Pasaporte</option>
                 </select>
                 <label>Número de Documento</label>
                 <input type="text" name="numero_documento" id="numero_documento" required />
@@ -43,7 +42,7 @@
                 <label>Fecha de nacimiento</label>
                 <input type="date" name="fecha_nacimiento" required />
 
-                <label>Departamento y Ciudad de Nacimiento</label>
+                <label>Departamento y Ciudad de Residencias</label>
                 <select name="departamento" id="departamento" required>
                     <option value="">Seleccione Departamento...</option>
                 </select>
@@ -68,6 +67,9 @@
                     <option value="">Seleccione...</option>
                     <option value="Soltero">Soltero(a)</option>
                     <option value="Casado">Casado(a)</option>
+                    <option value="Unión Libre">Unión Libre</option>
+                    <option value="Divorciado">Divorciado(a)</option>
+                    <option value="Viudo">Viudo(a)</option>
                 </select>
                 <label>Ocupación actual</label>
                 <select name="ocupacion" required>
