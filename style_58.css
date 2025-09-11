@@ -318,3 +318,27 @@ footer a:hover {
         padding: 10px;
     }
 }
+
+/* --- Responsive styles for location dropdowns --- */
+.location-selects {
+    display: flex;
+    gap: 10px;
+}
+
+.location-selects select {
+    width: auto;
+    flex-grow: 1;
+}
+
+@media (max-width: 600px) {
+    .location-selects {
+        flex-direction: column;
+        gap: 0;
+    }
+    .location-selects select {
+        width: 100%;
+    }
+    .location-selects select:first-child {
+        margin-bottom: 12px;
+    }
+}

@@ -24,7 +24,7 @@
             <!-- Formulario (oculto al inicio) -->
             <form id="form" class="hidden">
                 <label>Nombres y Apellidos (Completos)</label>
-                <input type="text" name="nombre" required />
+                <input type="text" name="nombre" required placeholder="Nombres y Apellidos Completos" />
 
                 <label>Tipo de Documento</label>
                 <select name="tipo_documento" id="tipo_documento" required>
@@ -43,15 +43,17 @@
                 <input type="date" name="fecha_nacimiento" required />
 
                 <label>Departamento y Ciudad de Residencia</label>
-                <select name="departamento" id="departamento" required>
-                    <option value="">Seleccione Departamento...</option>
-                </select>
-                <select name="ciudad" id="ciudad" required>
-                    <option value="">Seleccione Ciudad...</option>
-                </select>
+                <div class="location-selects">
+                    <select name="departamento" id="departamento" required>
+                        <option value="">Seleccione Departamento...</option>
+                    </select>
+                    <select name="ciudad" id="ciudad" required>
+                        <option value="">Seleccione Ciudad...</option>
+                    </select>
+                </div>
 
                 <label>Dirección de residencia</label>
-                <input type="text" name="direccion" required />
+                <input type="text" name="direccion" required placeholder="Ej: Calle 10 # 4-2, Apto 101" />
 
                 <label>Número de teléfono principal</label>
                 <input type="tel" name="telefono_principal" required pattern="[0-9]{7,10}" placeholder="Ej: 3001234567" />
@@ -68,7 +70,7 @@
 
                 <div id="correo-container" style="display: none;">
                     <label>Correo electrónico</label>
-                    <input type="email" name="correo" id="correo" />
+                    <input type="email" name="correo" id="correo" placeholder="ejemplo@correo.com" />
                 </div>
 
                 <label>Estado civil</label>
