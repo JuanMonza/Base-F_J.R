@@ -59,7 +59,7 @@
                 <input type="tel" name="telefono_principal" required pattern="[0-9]{7,10}" placeholder="Ej: 3001234567" />
 
                 <label>Número de teléfono (familiar)</label>
-                <input type="tel" name="telefono_familiar" required pattern="[0-9]{7,10}" placeholder="Ej: 3109876543" />
+                <input type="tel" name="telefono_familiar" pattern="[0-9]{7,10}" placeholder="Ej: 3109876543" />
 
                 <label>¿Tiene correo electrónico?</label>
                 <select name="tiene_correo" id="tiene_correo" required>
@@ -157,7 +157,7 @@
                 <a href="https://www.instagram.com/jardinesdelrenacer" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
                 <a href="https://www.jardinesdelrenacer.com" target="_blank" aria-label="Sitio Web"><i class="fas fa-globe"></i></a>
             </div>
-            <p>Creado por Juan Monsalve</p>
+            <p>Creado por <a href="https://github.com/JuanMonza" target="_blank" rel="noopener noreferrer">Juan Monsalve</a></p>
             <p>
                 <a href="#">Términos</a> |
                 <a href="#">Condiciones</a> |
@@ -173,6 +173,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/granim/2.0.0/granim.min.js"></script>
     <!-- Nuestro script personalizado -->
     <script src="script.js" defer></script>
+
+    <div id="success-modal" class="modal-overlay" style="display: none;">
+      <div class="modal-content">
+        <p id="modal-message"></p>
+        <button id="close-modal-btn">Cerrar</button>
+      </div>
+    </div>
 </body>
 
 </html>
