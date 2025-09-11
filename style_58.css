@@ -232,7 +232,7 @@ footer {
     text-align: center;
     padding: 20px;
     margin-top: 40px;
-    background: linear-gradient(to right, #2C3E50, #3498DB, #8E44AD); /* Degradado de azul oscuro a morado */
+    background: linear-gradient(to right, #002e5c, #071687, #0c0464); /* Degradado de azul oscuro a morado */
     color: var(--white);
     font-size: 14px;
     line-height: 1.5;
