@@ -318,4 +318,48 @@ document.addEventListener('DOMContentLoaded', () => {
     checkAge();
     fechaNacimientoInput.addEventListener('change', checkAge);
 
+    // --- LÓGICA DE ENVÍO DEL FORMULARIO ---
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault(); // Prevenir el envío por defecto del formulario
+
+        const numeroDocumento = numeroDocumentoInput.value;
+
+        // 1. Verificar si la cédula ya existe
+        try {
+            const checkResponse = await fetch('/.netlify/functions/check-cedula', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ numero_documento: numeroDocumento }),
+            });
+
+            const checkData = await checkResponse.json();
+
+            if (checkData.exists) {
+                modalIcon.classList.remove("success");
+                modalIcon.classList.add("error");
+                modalIconI.className = "fas fa-exclamation-circle";
+                modalMessage.textContent = "¡Ya has llenado este formulario!";
+                successModal.classList.add("visible");
+                return; // Detener el envío del formulario
+            }
+        } catch (error) {
+            console.error('Error al verificar la cédula:', error);
+            modalIcon.classList.remove("success");
+            modalIcon.classList.add("error");
+            modalIconI.className = "fas fa-exclamation-circle";
+            modalMessage.textContent = "Ocurrió un error al verificar tu cédula. Intenta de nuevo.";
+            successModal.classList.add("visible");
+            return;
+        }
+
+        // 2. Si la cédula no existe, proceder con el envío del formulario original
+        // Aquí asumimos que el formulario se envía a Netlify Forms o a submit-form.js
+        // Si el formulario usa Netlify Forms, puedes simplemente event.target.submit()
+        // Si usa submit-form.js, necesitarías hacer un fetch a esa función.
+        // Por ahora, asumiremos que el formulario se envía a Netlify Forms.
+        event.target.submit();
+    });
+
 });
