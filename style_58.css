@@ -301,13 +301,11 @@ footer a:hover {
     text-align: center;
 }
 
-.carousel-title {
-    text-align: center;
-    font-size: 2rem;
-    font-weight: 600;
-    color: var(--text-color);
-    margin-bottom: 1.5rem;
-    margin-top: 2rem;
+.carousel-title-image {
+    display: block;
+    margin: 0 auto 1.5rem auto; /* Centers the image and adds bottom margin */
+    max-width: 80%; /* Adjust as needed for responsiveness */
+    height: auto;
 }
 
 .carousel-container {
@@ -317,6 +315,24 @@ footer a:hover {
     margin: 2rem auto;
     overflow: hidden;
     padding: 0 20px;
+}
+
+@media (max-width: 768px) {
+    .carousel-title-image {
+        max-width: 70%;
+    }
+}
+
+@media (max-width: 480px) {
+    .carousel-title-image {
+        max-width: 90%;
+    }
+}
+
+@media (max-width: 375px) {
+    .carousel-title-image {
+        max-width: 95%;
+    }
 }
 
 .carousel-track {
