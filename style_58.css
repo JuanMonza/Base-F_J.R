@@ -316,6 +316,7 @@ footer a:hover {
     max-width: 900px;
     margin: 2rem auto;
     overflow: hidden;
+    padding: 0 20px;
 }
 
 .carousel-track {
@@ -325,7 +326,6 @@ footer a:hover {
 
 .carousel-slide {
     min-width: 100%;
-    padding: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -337,8 +337,10 @@ footer a:hover {
     height: auto;
     border-radius: 15px;
     /* box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); */
-    object-fit: cover;
+    object-fit: contain;
     transition: transform 0.3s ease;
+    display: block;
+    margin: 0 auto;
 }
 
 .carousel-slide img:hover {
