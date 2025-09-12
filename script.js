@@ -3,20 +3,21 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM Content Loaded. Script is running.');
 
     // --- INICIALIZACIÓN DE GRANIM.JS PARA EL FOOTER ---
-    new Granim({
-        element: '#granim-canvas',
-        direction: 'left-right',
-        states : {
-            "default-state": {
-                gradients: [
-                    ['#2C3E50', '#3498DB'],
-                    ['#3498DB', '#8E44AD'],
-                    ['#8E44AD', '#2C3E50']
-                ],
-                transitionSpeed: 5000
+    // Asegúrate de que Granim.js esté cargado antes de intentar inicializarlo
+    if (typeof Granim !== 'undefined') {
+        new Granim({
+            element: '#granim-canvas',
+            direction: 'left-right',
+            states: {
+                "default-state": {
+                    gradients: [['#2C3E50', '#3498DB'], ['#3498DB', '#8E44AD'], ['#8E44AD', '#2C3E50']],
+                    transitionSpeed: 5000
+                }
             }
-        }
-    });
+        });
+    } else {
+        console.warn('Granim.js no está cargado. Asegúrate de incluir la librería.');
+    }
 
     // --- ELEMENTOS DEL DOM ---
     const showBtn = document.getElementById("showFormBtn");
@@ -29,6 +30,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeModalBtn = document.getElementById("close-modal-btn");
     const modalIcon = document.querySelector(".modal-icon");
     const modalIconI = document.getElementById("modal-icon-i");
+
+    // --- LÓGICA PARA MOSTRAR EL FORMULARIO ---
+    if (showBtn && form) {
+        showBtn.addEventListener('click', () => {
+            // Oculta el botón y muestra el formulario con la animación
+            showBtn.style.display = 'none';
+            form.classList.remove('hidden');
+        });
+    }
 
     // --- LÓGICA DE DEPARTAMENTOS Y CIUDADES ---
     const colombianLocations = {
@@ -44,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
         "Cauca": ["Almaguer", "Argelia", "Balboa", "Bolívar", "Buenos Aires", "Cajibío", "Caldono", "Caloto", "Corinto", "El Tambo", "Florencia", "Guachené", "Guapí", "Inzá", "Jambaló", "La Sierra", "La Vega", "López de Micay", "Mercaderes", "Miranda", "Morales", "Padilla", "Páez", "Patía", "Piamonte", "Piendamó", "Popayán", "Puerto Tejada", "Puracé", "Rosas", "San Sebastián", "Santander de Quilichao", "Santa Rosa", "Silvia", "Sotará", "Suárez", "Sucre", "Timbío", "Timbiquí", "Toribío", "Totoró", "Villa Rica"],
         "Cesar": ["Aguachica", "Agustín Codazzi", "Astrea", "Becerril", "Bosconia", "Chimichagua", "Chiriguaná", "Curumaní", "El Copey", "El Paso", "Gamarra", "González", "La Gloria", "La Jagua de Ibirico", "La Paz", "Manaure Balcón del Cesar", "Pailitas", "Pelaya", "Pueblo Bello", "Río de Oro", "San Alberto", "San Diego", "San Martín", "Tamalameque", "Valledupar"],
         "Chocó": ["Acandí", "Alto Baudó", "Bagadó", "Bahía Solano", "Bajo Baudó", "Bojayá", "Cantón de San Pablo", "Cértegui", "Condoto", "El Atrato", "El Carmen de Atrato", "El Carmen del Darién", "Istmina", "Juradó", "Litoral de San Juan", "Lloró", "Medio Atrato", "Medio Baudó", "Medio San Juan", "Nóvita", "Nuquí", "Quibdó", "Riosucio", "Río Iró", "Río Quito", "San José del Palmar", "Sipí", "Tadó", "Unguía", "Unión Panamericana"],
-        "Cundinamarca": ["Agua de Dios", "Albán", "Anapoima", "Anolaima", "Apulo", "Arbeláez", "Beltrán", "Bituima", "Bogotá", "Bojacá", "Cabrera", "Cachipay", "Cajicá", "Caparrapí", "Cáqueza", "Carmen de Carupa", "Chaguaní", "Chía", "Chipaque", "Choachí", "Chocontá", "Cogua", "Cota", "Cucunubá", "El Colegio", "El Peñón", "El Rosal", "Facatativá", "Fómeque", "Fosca", "Funza", "Fúquene", "Fusagasugá", "Gachalá", "Gachancipá", "Gachetá", "Gama", "Girardot", "Granada", "Guachetá", "Guaduas", "Guasca", "Guataquí", "Guatavita", "Guayabal de Síquima", "Guayabetal", "Gutiérrez", "Jerusalén", "Junín", "La Calera", "La Mesa", "La Palma", "La Peña", "La Vega", "Lenguazaque", "Machetá", "Madrid", "Manta", "Medina", "Mosquera", "Nariño", "Nemocón", "Nilo", "Nimaima", "Nocaima", "Pacho", "Paime", "Pandi", "Paratebueno", "Pasca", "Puerto Salgar", "Pulí", "Quebradanegra", "Quetame", "Quipile", "Ricaurte", "San Antonio del Tequendama", "San Bernardo", "San Cayetano", "San Francisco", "San Juan de Rioseco", "Sasaima", "Sesquilé", "Sibaté", "Silvania", "Simijaca", "Soacha", "Sopó", "Subachoque", "Suesca", "Supatá", "Susa", "Sutatausa", "Tabio", "Tausa", "Tena", "Tenjo", "Tibacuy", "Tibirita", "Tocaima", "Tocancipá", "Topaipí", "Ubalá", "Ubaque", "Ubaté", "Une", "Útica", "Venecia", "Vergara", "Vianí", "Villagómez", "Villapinzón", "Villeta", "Viotá", "Yacopí", "Zipacón", "Zipaquirá"],
+        "Cundinamarca": ["Agua de Dios", "Albán", "Anapoima", "Anolaima", "Apulo", "Arbeláez", "Beltrán", "Bituima", "Bogotá", "Bojacá", "Cabrera", "Cachipay", "Cajicá", "Caparrapí", "Cáqueza", "Carmen de Carupa", "Chaguaní", "Chía", "Chipaque", "Chocontá", "Cogua", "Cota", "Cucunubá", "El Colegio", "El Peñón", "El Rosal", "Facatativá", "Fómeque", "Fosca", "Funza", "Fúquene", "Fusagasugá", "Gachalá", "Gachancipá", "Gachetá", "Gama", "Girardot", "Granada", "Guachetá", "Guaduas", "Guasca", "Guataquí", "Guatavita", "Guayabal de Síquima", "Guayabetal", "Gutiérrez", "Jerusalén", "Junín", "La Calera", "La Mesa", "La Palma", "La Peña", "La Vega", "Lenguazaque", "Machetá", "Madrid", "Manta", "Medina", "Mosquera", "Nariño", "Nemocón", "Nilo", "Nimaima", "Nocaima", "Pacho", "Paime", "Pandi", "Paratebueno", "Pasca", "Puerto Salgar", "Pulí", "Quebradanegra", "Quetame", "Quipile", "Ricaurte", "San Antonio del Tequendama", "San Bernardo", "San Cayetano", "San Francisco", "San Juan de Rioseco", "Sasaima", "Sesquilé", "Sibaté", "Silvania", "Simijaca", "Soacha", "Sopó", "Subachoque", "Suesca", "Supatá", "Susa", "Sutatausa", "Tabio", "Tausa", "Tena", "Tenjo", "Tibacuy", "Tibirita", "Tocaima", "Tocancipá", "Topaipí", "Ubalá", "Ubaque", "Ubaté", "Une", "Útica", "Venecia", "Vergara", "Vianí", "Villagómez", "Villapinzón", "Villeta", "Viotá", "Yacopí", "Zipacón", "Zipaquirá"],
         "Córdoba": ["Ayapel", "Buenavista", "Canalete", "Cereté", "Chimá", "Chinú", "Ciénaga de Oro", "Cotorra", "La Apartada", "Lorica", "Los Córdobas", "Momil", "Moñitos", "Montelíbano", "Montería", "Planeta Rica", "Pueblo Nuevo", "Puerto Escondido", "Puerto Libertador", "Purísima", "Sahagún", "San Andrés de Sotavento", "San Antero", "San Bernardo del Viento", "San Carlos", "San José de Uré", "San Pelayo", "Tierralta", "Tuchín", "Valencia"],
         "Guainía": ["Inírida"],
         "Guaviare": ["Calamar", "El Retorno", "Miraflores", "San José del Guaviare"],
@@ -89,13 +99,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 option.value = ciudad;
                 option.textContent = ciudad;
                 ciudadSelect.appendChild(option);
-            });
+            }
+            );
         }
     }
 
     departamentoSelect.addEventListener('change', (event) => {
         populateCiudades(event.target.value);
-    });
+    }
+    );
 
     populateDepartamentos();
 
@@ -117,7 +129,8 @@ document.addEventListener('DOMContentLoaded', () => {
             fondoPensionSelect.required = false;
             fondoPensionSelect.value = '';
         }
-    });
+    }
+    );
 
     tieneCorreoSelect.addEventListener('change', () => {
         if (tieneCorreoSelect.value === 'Si') {
@@ -128,7 +141,8 @@ document.addEventListener('DOMContentLoaded', () => {
             correoInput.required = false;
             correoInput.value = '';
         }
-    });
+    }
+    );
 
     // --- LÓGICA DE VALIDACIÓN DE DOCUMENTO ---
     const tipoDocumentoSelect = document.getElementById('tipo_documento');
@@ -136,7 +150,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const forceNumericInput = (event) => {
         event.target.value = event.target.value.replace(/[^0-9]/g, '');
-    };
+    }
+    ;
 
     // Always enforce numeric input
     numeroDocumentoInput.addEventListener('input', forceNumericInput);
@@ -147,38 +162,41 @@ document.addEventListener('DOMContentLoaded', () => {
         numeroDocumentoInput.placeholder = '';
 
         switch (selectedType) {
-            case 'CC':
-                numeroDocumentoInput.setAttribute('pattern', '[0-9]{5,15}');
-                numeroDocumentoInput.setAttribute('title', 'Solo números (5 a 15 dígitos)');
-                numeroDocumentoInput.placeholder = 'Ej: 123456789';
-                numeroDocumentoInput.type = 'text';
-                break;
-            case 'PEP':
-            case 'CE':
-                numeroDocumentoInput.setAttribute('pattern', '[0-9]{5,20}');
-                numeroDocumentoInput.setAttribute('title', 'Solo números (5 a 20 dígitos)');
-                numeroDocumentoInput.placeholder = 'Ej: 1000123456';
-                numeroDocumentoInput.type = 'text';
-                break;
-            default:
-                numeroDocumentoInput.removeAttribute('pattern');
-                numeroDocumentoInput.removeAttribute('title');
-                numeroDocumentoInput.placeholder = '';
-                numeroDocumentoInput.type = 'text';
-                break;
+        case 'CC':
+            numeroDocumentoInput.setAttribute('pattern', '[0-9]{5,15}');
+            numeroDocumentoInput.setAttribute('title', 'Solo números (5 a 15 dígitos)');
+            numeroDocumentoInput.placeholder = 'Ej: 123456789';
+            numeroDocumentoInput.type = 'text';
+            break;
+        case 'PEP':
+        case 'CE':
+            numeroDocumentoInput.setAttribute('pattern', '[0-9]{5,20}');
+            numeroDocumentoInput.setAttribute('title', 'Solo números (5 a 20 dígitos)');
+            numeroDocumentoInput.placeholder = 'Ej: 1000123456';
+            numeroDocumentoInput.type = 'text';
+            break;
+        default:
+            numeroDocumentoInput.removeAttribute('pattern');
+            numeroDocumentoInput.removeAttribute('title');
+            numeroDocumentoInput.placeholder = '';
+            numeroDocumentoInput.type = 'text';
+            break;
         }
     }
 
     // --- LÓGICA DEL POP-UP DE BIENVENIDA ---
-    giveawayPopup.classList.remove('hidden'); // Show immediately
+    giveawayPopup.classList.remove('hidden');
+    // Show immediately
 
     closePopupBtn.addEventListener("click", () => {
         giveawayPopup.classList.add("hidden");
-    });
+    }
+    );
 
     closeModalBtn.addEventListener("click", () => {
         successModal.classList.remove("visible");
-    });
+    }
+    );
 
     // --- INICIALIZACIÓN DE FLATPCIKR ---
     flatpickr('input[type="date"]', {
@@ -193,7 +211,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function checkAge() {
         const birthDate = new Date(fechaNacimientoInput.value);
         const today = new Date();
-        if (isNaN(birthDate.getTime())) { // Invalid date
+        if (isNaN(birthDate.getTime())) {
+            // Invalid date
             return;
         }
         let age = today.getFullYear() - birthDate.getFullYear();
@@ -201,69 +220,102 @@ document.addEventListener('DOMContentLoaded', () => {
         if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
             age--;
         }
-
-        if (age < 18) {
-            msg.textContent = 'Debes ser mayor de 18 años para registrarte.';
-            msg.style.color = 'red';
-            submitButton.disabled = true;
-        } else {
-            msg.textContent = '';
-            submitButton.disabled = false;
-        }
     }
 
-    fechaNacimientoInput.addEventListener('change', checkAge);
+    // --- LÓGICA DEL CARRUSEL ---
+    const carouselContainer = document.querySelector('.carousel-container');
+    const carouselTrack = document.querySelector('.carousel-track');
+    const carouselSlides = Array.from(document.querySelectorAll('.carousel-slide'));
 
-    // --- EVENTO PARA MOSTRAR EL FORMULARIO ---
-    showBtn.addEventListener("click", () => {
-        form.classList.remove("hidden");
-        showBtn.classList.add("hidden");
+    // Solo ejecutar la lógica del carrusel si los elementos existen
+    if (carouselContainer && carouselTrack && carouselSlides.length > 0) {
+        // const nextBtn = document.querySelector('.next-btn'); // Buttons are hidden
+        // const prevBtn = document.querySelector('.prev-btn'); // Buttons are hidden
 
-        // Call validation logic here, after the form is visible
-        applyDocumentValidation();
-        tipoDocumentoSelect.addEventListener('change', applyDocumentValidation);
-    });
+        let slideWidth = carouselSlides[0].getBoundingClientRect().width;
+        let currentIndex = 0;
+        let autoSlideInterval;
 
-    // --- EVENTO PARA MANEJAR EL ENVÍO DEL FORMULARIO ---
-    form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        msg.textContent = "Enviando...";
-        
-        const formData = new FormData(form);
-        const jsonData = {};
-        formData.forEach((value, key) => {
-            jsonData[key] = value;
+        // La función setSlidePosition no era necesaria ya que flexbox se encarga del posicionamiento.
+
+        const moveToSlide = (track, targetIndex) => {
+            if (targetIndex < 0) {
+                targetIndex = carouselSlides.length - 1;
+            } else if (targetIndex >= carouselSlides.length) {
+                targetIndex = 0;
+            }
+            currentIndex = targetIndex;
+            track.style.transform = 'translateX(-' + (slideWidth * currentIndex) + 'px)';
+
+            // Update current-slide class
+            carouselSlides.forEach((slide, index) => {
+                if (index === currentIndex) {
+                    slide.classList.add('current-slide');
+                } else {
+                    slide.classList.remove('current-slide');
+                }
+            });
+        };
+
+        const startAutoSlide = () => {
+            autoSlideInterval = setInterval(() => {
+                moveToSlide(carouselTrack, currentIndex + 1);
+            }, 3000); // Change slide every 3 seconds
+        };
+
+        const stopAutoSlide = () => {
+            clearInterval(autoSlideInterval);
+        };
+
+        // Initialize the first slide as current
+        carouselSlides[0].classList.add('current-slide');
+        startAutoSlide(); // Start auto-play
+
+        // Update slideWidth on resize
+        window.addEventListener('resize', () => {
+            stopAutoSlide(); // Stop auto-play during resize
+            slideWidth = carouselSlides[0].getBoundingClientRect().width;
+            // Recalculate transform to keep current slide in view
+            carouselTrack.style.transform = 'translateX(-' + (slideWidth * currentIndex) + 'px)';
+            startAutoSlide(); // Restart auto-play after resize
         });
 
-        try {
-            const res = await fetch("/.netlify/functions/submit-form", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(jsonData)
-            });
+        // --- Swipe Functionality ---
+        let touchStartX = 0;
+        let touchEndX = 0;
+        const swipeThreshold = 50; // Minimum pixels to register a swipe
 
-            if (res.ok) {
-                modalMessage.textContent = "¡Datos actualizados correctamente!";
-                modalIcon.className = "modal-icon success";
-                modalIconI.className = "fas fa-check";
-                successModal.classList.add("visible");
-                form.reset();
-                msg.textContent = "";
-            } else {
-                modalMessage.textContent = "Error al enviar los datos";
-                modalIcon.className = "modal-icon error";
-                modalIconI.className = "fas fa-times";
-                successModal.classList.add("visible");
+        carouselContainer.addEventListener('touchstart', (e) => {
+            stopAutoSlide(); // Stop auto-play on touch
+            touchStartX = e.touches[0].clientX;
+        });
+
+        carouselContainer.addEventListener('touchmove', (e) => {
+            touchEndX = e.touches[0].clientX;
+            // Optional: Add visual feedback for dragging
+            // e.preventDefault(); // Prevent scrolling if you want pure horizontal swipe
+        });
+
+        carouselContainer.addEventListener('touchend', () => {
+            const diffX = touchStartX - touchEndX;
+
+            if (Math.abs(diffX) > swipeThreshold) {
+                if (diffX > 0) { // Swiped left
+                    moveToSlide(carouselTrack, currentIndex + 1);
+                } else { // Swiped right
+                    moveToSlide(carouselTrack, currentIndex - 1);
+                }
             }
-        } catch (error) {
-            console.error('Error en la conexión:', error);
-            modalMessage.textContent = "Error de conexión";
-            modalIcon.className = "modal-icon error";
-            modalIconI.className = "fas fa-exclamation-triangle";
-            successModal.classList.add("visible");
-        }
-    });
+            startAutoSlide(); // Restart auto-play after swipe
+        });
+    }
+
+    // Initial call to apply validation on page load
+    applyDocumentValidation();
+    tipoDocumentoSelect.addEventListener('change', applyDocumentValidation);
+
+    // Initial check for age on page load if date is pre-filled
+    checkAge();
+    fechaNacimientoInput.addEventListener('change', checkAge);
 
 });

@@ -1,14 +1,20 @@
 @import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap');
 
 :root {
-    --primary-color: #005A9C; /* Azul Principal */
-    --primary-color-dark: #004070; /* Azul más oscuro para hover */
-    --accent-color: #3a37d4; /* Dorado */
+    --primary-color: #005A9C;
+    /* Azul Principal */
+    --primary-color-dark: #004070;
+    /* Azul más oscuro para hover */
+    --accent-color: #3a37d4;
+    /* Dorado */
     --accent-color-dark: #3230b8;
-    --focus-color: #007BFF; /* Azul Acento para foco */
-    --text-color: #1d1d1d; /* Gris Oscuro */
+    --focus-color: #007BFF;
+    /* Azul Acento para foco */
+    --text-color: #1d1d1d;
+    /* Gris Oscuro */
     --text-color-light: #323232;
-    --background-color: #f8f9fa; /* Gris Suave */
+    --background-color: #f8f9fa;
+    /* Gris Suave */
     --container-background: #ffffff;
     --border-color: #ccc;
     --white: #fff;
@@ -20,9 +26,9 @@ body {
     padding: 0;
     color: var(--text-color);
     line-height: 1.6;
-    display: flex; /* Habilitar Flexbox */
-    flex-direction: column; /* Elementos en columna */
-    min-height: 100vh; /* Ocupar al menos el 100% de la altura de la ventana */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 
     /* Fondo con imagen y filtro oscuro */
     background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/Logos_2025/conmemorativo-zaragoza.jpeg');
@@ -32,19 +38,15 @@ body {
 }
 
 .page-content-wrapper {
-    flex-grow: 1; /* Permite que el contenido principal crezca y empuje el footer */
-    display: flex; /* Habilitar Flexbox para centrar el contenido */
-    flex-direction: column; /* Elementos en columna */
-    justify-content: center; /* Centrado vertical */
-    align-items: center; /* Centrado horizontal */
-    padding: 20px; /* Añadir un poco de padding para evitar que el contenido toque los bordes */
+    flex-grow: 1;
+    padding: 20px;
 }
 
 .container {
-    max-width: 450px; /* Reducimos el ancho máximo */
+    max-width: 450px;
     margin: 30px auto;
     padding: 25px;
-    background: rgba(255, 255, 255, 0.9); /* Blanco con 90% de opacidad */
+    background: rgba(255, 255, 255, 0.9);
     border-radius: 12px;
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.07);
     transition: all 0.3s ease-in-out;
@@ -56,16 +58,18 @@ body {
 
 .logo {
     display: block;
-    margin: 0 auto 20px auto;
-    max-width: 180px;
+    margin: 0 auto 2rem auto;
+    max-width: 350px;
+    height: auto;
 }
 
 h1 {
-    font-size: 24px;
+    font-size: 1.5rem;
     text-align: center;
-    margin-bottom: 10px;
+    margin-bottom: 1rem;
     color: var(--primary-color);
     font-weight: 700;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 p {
@@ -157,7 +161,7 @@ button[type="submit"]:hover {
     width: 320px;
     background-color: var(--container-background);
     border-radius: 12px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
     z-index: 1000;
     overflow: hidden;
     font-family: 'Lato', sans-serif;
@@ -214,7 +218,7 @@ button[type="submit"]:hover {
 
 #close-popup-btn:hover {
     color: #333;
-    transform: none; /* Anular el transform de otros botones */
+    transform: none;
 }
 
 /* Animación de entrada */
@@ -223,49 +227,38 @@ button[type="submit"]:hover {
         transform: translateY(100%);
         opacity: 0;
     }
+
     to {
         transform: translateY(0);
         opacity: 1;
     }
 }
 
-
-
 /* --- Estilos para el Footer --- */
 footer {
-    position: relative; /* Necesario para posicionar el canvas */
     text-align: center;
-    padding: 20px;
-    margin-top: 0;
-    background: linear-gradient(to right, #002e5c, #071687, #0c0464); /* Degradado de azul oscuro a morado */
+    padding: 15px 0; /* Reduced padding */
+    margin-top: auto;
+    background: linear-gradient(to bottom, rgba(0, 46, 92, 0.8), #002e5c);
     color: var(--white);
     font-size: 14px;
     line-height: 1.5;
-    overflow: hidden; /* Para que el canvas no se salga */
-}
-
-#granim-canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1; /* Asegura que el canvas esté detrás del contenido del footer */
+    position: relative;
 }
 
 .footer-content {
-    position: relative; /* Asegura que el contenido esté sobre el canvas */
+    position: relative;
     z-index: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100%; /* Ocupa toda la altura del footer */
+    height: 100%;
 }
 
 footer p {
-    margin: 5px 0;
-    color: var(--white); /* Asegurar que el texto sea blanco */
+    margin: 2px 0;
+    color: var(--white);
 }
 
 footer a {
@@ -276,12 +269,12 @@ footer a {
 }
 
 footer a:hover {
-    color: var(--focus-color); /* Usar el color de foco para el hover */
+    color: var(--focus-color);
 }
 
 .social-links {
-    margin-top: 15px;
-    margin-bottom: 10px;
+    margin-top: 8px;
+    margin-bottom: 8px;
 }
 
 .social-links a {
@@ -298,41 +291,123 @@ footer a:hover {
 }
 
 .social-links a:hover {
-    background-color: var(--focus-color); /* Usar el color de foco para el hover */
-    color: var(--primary-color-dark); /* Color del icono al hacer hover */
+    background-color: var(--focus-color);
+    color: var(--primary-color-dark);
 }
 
-@media (max-width: 600px) {
+/* --- Carousel Styles --- */
+.carousel-section {
+    padding: 2rem 0;
+    text-align: center;
+}
+
+.carousel-title {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 1.5rem;
+    margin-top: 2rem;
+}
+
+.carousel-container {
+    position: relative;
+    width: 100%;
+    max-width: 900px;
+    margin: 2rem auto;
+    overflow: hidden;
+}
+
+.carousel-track {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+}
+
+.carousel-slide {
+    min-width: 100%;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.carousel-slide img {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    border-radius: 15px;
+    /* box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); */
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.carousel-slide img:hover {
+    transform: translateY(-8px);
+    /* box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2); */
+}
+
+.carousel-button {
+    display: none; /* Hide carousel buttons */
+}
+
+.prev-btn {
+    display: none; /* Hide prev button */
+}
+
+.next-btn {
+    display: none; /* Hide next button */
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 768px) {
     .container {
-        margin: 15px;
+        max-width: 90%; /* Make container more fluid */
         padding: 15px;
+        margin: 15px auto;
     }
 
     h1 {
-        font-size: 22px;
+        font-size: 1.3rem;
     }
 
-    button {
-        font-size: 15px;
-        padding: 12px;
+    p {
+        font-size: 14px;
+    }
+
+    label {
+        font-size: 14px;
     }
 
     input,
-    select {
-        font-size: 14px;
+    select,
+    button {
         padding: 10px;
+        font-size: 14px;
     }
-}
 
-/* --- Responsive styles for location dropdowns --- */
-.location-selects {
-    display: flex;
-    gap: 10px;
-}
+    .carousel-title {
+        font-size: 1.8rem;
+    }
 
-.location-selects select {
-    width: auto;
-    flex-grow: 1;
+    .carousel-slide img {
+        max-width: 250px;
+    }
+
+    .carousel-button {
+        display: none; /* Hide carousel buttons */
+    }
+
+    .prev-btn {
+        display: none; /* Hide prev button */
+    }
+
+    .next-btn {
+        display: none; /* Hide next button */
+    }
+
+    .logo {
+        max-width: 280px;
+    }
 }
 
 @media (max-width: 600px) {
@@ -340,97 +415,229 @@ footer a:hover {
         flex-direction: column;
         gap: 0;
     }
+
     .location-selects select {
         width: 100%;
     }
+
     .location-selects select:first-child {
         margin-bottom: 12px;
     }
 }
 
+@media (max-width: 480px) {
+    .container {
+        padding: 10px;
+        margin: 10px auto;
+    }
+
+    h1 {
+        font-size: 1.1rem;
+    }
+
+    p {
+        font-size: 13px;
+    }
+
+    label {
+        font-size: 13px;
+    }
+
+    input,
+    select,
+    button {
+        padding: 8px;
+        font-size: 13px;
+    }
+
+    .carousel-title {
+        font-size: 1.5rem;
+    }
+
+    .carousel-slide img {
+        max-width: 180px;
+    }
+
+    .carousel-button {
+        display: none; /* Hide carousel buttons */
+    }
+
+    .prev-btn {
+        display: none; /* Hide prev button */
+    }
+
+    .next-btn {
+        display: none; /* Hide next button */
+    }
+
+    .logo {
+        max-width: 210px;
+    }
+
+    #giveaway-popup {
+        width: 90%;
+        right: 5%;
+        bottom: 10px;
+    }
+
+    .popup-content {
+        padding: 15px;
+    }
+
+    .popup-image {
+        width: 60px;
+        height: 60px;
+    }
+
+    #giveaway-popup h2 {
+        font-size: 16px;
+    }
+
+    #giveaway-popup p {
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 375px) {
+    .container {
+        padding: 8px;
+        margin: 8px auto;
+    }
+
+    h1 {
+        font-size: 1rem;
+    }
+
+    p {
+        font-size: 12px;
+    }
+
+    label {
+        font-size: 12px;
+    }
+
+    input,
+    select,
+    button {
+        padding: 6px;
+        font-size: 12px;
+    }
+
+    .carousel-title {
+        font-size: 1.3rem;
+    }
+
+    .carousel-slide img {
+        max-width: 150px;
+    }
+
+    .logo {
+        max-width: 180px;
+    }
+
+    #giveaway-popup {
+        width: 95%;
+        right: 2.5%;
+        bottom: 5px;
+    }
+
+    .popup-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .popup-image {
+        margin-bottom: 10px;
+    }
+
+    .popup-text {
+        margin-left: 0;
+    }
+}
+
 /* Modal styles */
 .modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 2000;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
 .modal-overlay.visible {
-  opacity: 1;
-  visibility: visible;
+    opacity: 1;
+    visibility: visible;
 }
 
 .modal-content {
-  background-color: #fff;
-  padding: 40px;
-  border-radius: 16px;
-  text-align: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  transform: scale(0.9);
-  transition: transform 0.3s ease;
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
 }
 
 .modal-overlay.visible .modal-content {
-  transform: scale(1);
+    transform: scale(1);
 }
 
 .modal-icon {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  margin: 0 auto 20px auto;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin: 0 auto 20px auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .modal-icon.success {
-  background-color: #E8F5E9; /* Light green */
+    background-color: #E8F5E9;
 }
 
 .modal-icon.error {
-  background-color: #FFEBEE; /* Light red */
+    background-color: #FFEBEE;
 }
 
 .modal-icon i {
-  font-size: 40px;
+    font-size: 40px;
 }
 
 .modal-icon.success i {
-  color: #4CAF50; /* Green */
+    color: #4CAF50;
 }
 
 .modal-icon.error i {
-  color: #F44336; /* Red */
+    color: #F44336;
 }
 
 #modal-message {
-  font-size: 22px;
-  font-weight: 600;
-  color: var(--text-color);
-  margin-bottom: 25px;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 25px;
 }
 
 #close-modal-btn {
-  background-color: var(--primary-color);
-  color: #fff;
-  padding: 12px 25px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: 600;
-  transition: background-color 0.3s;
+    background-color: var(--primary-color);
+    color: #fff;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: background-color 0.3s;
 }
 
 #close-modal-btn:hover {
@@ -441,7 +648,7 @@ footer a:hover {
 .wave-container {
     position: relative;
     width: 100%;
-    height: 100px;
+    height: 60px;
     overflow: hidden;
 }
 
@@ -450,33 +657,39 @@ footer a:hover {
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 100px;
+    height: 60px;
 }
 
-.parallax > use {
-    animation: move-forever 25s cubic-bezier(.55,.5,.45,.5) infinite;
+.parallax>use {
+    animation: move-forever 25s cubic-bezier(.55, .5, .45, .5) infinite;
 }
-.parallax > use:nth-child(1) {
+
+.parallax>use:nth-child(1) {
     animation-delay: -2s;
     animation-duration: 7s;
 }
-.parallax > use:nth-child(2) {
+
+.parallax>use:nth-child(2) {
     animation-delay: -3s;
     animation-duration: 10s;
 }
-.parallax > use:nth-child(3) {
+
+.parallax>use:nth-child(3) {
     animation-delay: -4s;
     animation-duration: 13s;
 }
-.parallax > use:nth-child(4) {
+
+.parallax>use:nth-child(4) {
     animation-delay: -5s;
     animation-duration: 20s;
 }
+
 @keyframes move-forever {
     0% {
-        transform: translate3d(-90px,0,0);
+        transform: translate3d(-90px, 0, 0);
     }
+
     100% {
-        transform: translate3d(85px,0,0);
+        transform: translate3d(85px, 0, 0);
     }
 }
