@@ -355,11 +355,52 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // 2. Si la cédula no existe, proceder con el envío del formulario original
-        // Aquí asumimos que el formulario se envía a Netlify Forms o a submit-form.js
-        // Si el formulario usa Netlify Forms, puedes simplemente event.target.submit()
-        // Si usa submit-form.js, necesitarías hacer un fetch a esa función.
-        // Por ahora, asumiremos que el formulario se envía a Netlify Forms.
-        event.target.submit();
+        // Recolectar todos los datos del formulario
+        const formData = new FormData(form);
+        const formObject = {};
+        formData.forEach((value, key) => {
+            formObject[key] = value;
+        });
+
+        // Convertir el valor del checkbox de privacidad a booleano
+        formObject.privacidad = formObject.privacidad === 'on';
+
+        // Enviar los datos a la función de Netlify submit-form.js
+        try {
+            const submitResponse = await fetch('/.netlify/functions/submit-form', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formObject),
+            });
+
+            const submitData = await submitResponse.json();
+
+            if (submitResponse.ok) {
+                modalIcon.classList.remove("error");
+                modalIcon.classList.add("success");
+                modalIconI.className = "fas fa-check-circle";
+                modalMessage.textContent = submitData.message || "¡Formulario enviado con éxito!";
+                successModal.classList.add("visible");
+                form.reset(); // Limpiar el formulario
+                form.classList.add('hidden'); // Ocultar el formulario
+                showBtn.style.display = 'block'; // Mostrar el botón inicial
+            } else {
+                modalIcon.classList.remove("success");
+                modalIcon.classList.add("error");
+                modalIconI.className = "fas fa-exclamation-circle";
+                modalMessage.textContent = submitData.message || "Error al enviar el formulario.";
+                successModal.classList.add("visible");
+            }
+        } catch (error) {
+            console.error('Error al enviar el formulario:', error);
+            modalIcon.classList.remove("success");
+            modalIcon.classList.add("error");
+            modalIconI.className = "fas fa-exclamation-circle";
+            modalMessage.textContent = "Ocurrió un error de red al enviar el formulario.";
+            successModal.classList.add("visible");
+        }
     });
 
 });
