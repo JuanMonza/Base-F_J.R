@@ -59,7 +59,7 @@ body {
 .logo {
     display: block;
     margin: 0 auto 2rem auto;
-    max-width: 350px;
+    max-width: 451px;
     height: auto;
 }
 
@@ -237,27 +237,26 @@ button[type="submit"]:hover {
 /* --- Estilos para el Footer --- */
 footer {
     text-align: center;
-    padding: 15px 0; /* Reduced padding */
+    padding: 1px 0;
     margin-top: auto;
     background: linear-gradient(to bottom, rgba(0, 46, 92, 0.8), #002e5c);
     color: var(--white);
     font-size: 14px;
     line-height: 1.5;
     position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .footer-content {
     position: relative;
     z-index: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
+    width: 100%;
 }
 
 footer p {
-    margin: 2px 0;
+    margin: 1px 0;
     color: var(--white);
 }
 
@@ -273,8 +272,8 @@ footer a:hover {
 }
 
 .social-links {
-    margin-top: 8px;
-    margin-bottom: 8px;
+    margin-top: 2px;
+    margin-bottom: 2px;
 }
 
 .social-links a {
@@ -304,17 +303,16 @@ footer a:hover {
 .carousel-title-image {
     display: block;
     margin: 0 auto 1.5rem auto; /* Centers the image and adds bottom margin */
-    max-width: 75%; /* Adjust as needed for responsiveness */
+    max-width: 50%; /* Adjust as needed for responsiveness */
     height: auto;
 }
 
 .carousel-container {
     position: relative;
-    width: 100%;
+    width: 90%;
     max-width: 900px;
     margin: 2rem auto;
     overflow: hidden;
-    padding: 0 20px;
 }
 
 @media (max-width: 768px) {
@@ -341,6 +339,7 @@ footer a:hover {
 }
 
 .carousel-slide {
+    flex: 0 0 100%; /* No crecer, no encoger, base del 100% */
     min-width: 100%;
     display: flex;
     justify-content: center;
@@ -424,7 +423,7 @@ footer a:hover {
     }
 
     .logo {
-        max-width: 280px;
+        max-width: 400px;
     }
 }
 
@@ -489,7 +488,19 @@ footer a:hover {
     }
 
     .logo {
-        max-width: 210px;
+        max-width: 211px;
+    }
+
+    footer {
+        font-size: 13px;
+    }
+
+    .social-links a {
+        width: 32px;
+        height: 32px;
+        line-height: 32px;
+        font-size: 16px;
+        margin: 0 6px;
     }
 
     #giveaway-popup {
@@ -550,7 +561,19 @@ footer a:hover {
     }
 
     .logo {
-        max-width: 180px;
+        max-width: 181px;
+    }
+
+    footer {
+        font-size: 12px;
+    }
+
+    .social-links a {
+        width: 28px;
+        height: 28px;
+        line-height: 28px;
+        font-size: 14px;
+        margin: 0 4px;
     }
 
     #giveaway-popup {

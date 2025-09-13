@@ -222,92 +222,111 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- LÓGICA DEL CARRUSEL ---
+    // --- LÓGICA DEL CARRUSEL (VERSIÓN CON BUCLE INFINITO) ---
     const carouselContainer = document.querySelector('.carousel-container');
     const carouselTrack = document.querySelector('.carousel-track');
-    const carouselSlides = Array.from(document.querySelectorAll('.carousel-slide'));
+    const originalSlides = Array.from(document.querySelectorAll('.carousel-slide'));
 
-    // Solo ejecutar la lógica del carrusel si los elementos existen
-    if (carouselContainer && carouselTrack && carouselSlides.length > 0) {
-        // const nextBtn = document.querySelector('.next-btn'); // Buttons are hidden
-        // const prevBtn = document.querySelector('.prev-btn'); // Buttons are hidden
+    // Solo ejecutar la lógica del carrusel si los elementos existen y hay más de una diapositiva
+    if (carouselContainer && carouselTrack && originalSlides.length > 1) {
 
-        let slideWidth = carouselSlides[0].getBoundingClientRect().width;
-        let currentIndex = 0;
+        // 1. Clonar diapositivas para bucle infinito
+        const firstClone = originalSlides[0].cloneNode(true);
+        const lastClone = originalSlides[originalSlides.length - 1].cloneNode(true);
+
+        firstClone.id = 'first-clone';
+        lastClone.id = 'last-clone';
+
+        carouselTrack.appendChild(firstClone);
+        carouselTrack.insertBefore(lastClone, originalSlides[0]);
+
+        const allSlides = Array.from(carouselTrack.children);
+        let slideWidth = carouselContainer.getBoundingClientRect().width;
+        let currentIndex = 1; // Empezar en la primera diapositiva real
         let autoSlideInterval;
+        let isTransitioning = false;
 
-        // La función setSlidePosition no era necesaria ya que flexbox se encarga del posicionamiento.
-
-        const moveToSlide = (track, targetIndex) => {
-            if (targetIndex < 0) {
-                targetIndex = carouselSlides.length - 1;
-            } else if (targetIndex >= carouselSlides.length) {
-                targetIndex = 0;
+        // 2. Posición inicial y actualizaciones
+        const updatePosition = (withTransition = true) => {
+            if (!withTransition) {
+                carouselTrack.style.transition = 'none';
             }
-            currentIndex = targetIndex;
-            track.style.transform = 'translateX(-' + (slideWidth * currentIndex) + 'px)';
-
-            // Update current-slide class
-            carouselSlides.forEach((slide, index) => {
-                if (index === currentIndex) {
-                    slide.classList.add('current-slide');
-                } else {
-                    slide.classList.remove('current-slide');
-                }
-            });
+            carouselTrack.style.transform = `translateX(-${slideWidth * currentIndex}px)`;
+            if (!withTransition) {
+                // Forzar reflow para aplicar el cambio sin transición y luego restaurarla
+                carouselTrack.offsetHeight;
+                carouselTrack.style.transition = 'transform 0.5s ease-in-out';
+            }
         };
 
+        // 3. Lógica de movimiento
+        const moveToSlide = (newIndex) => {
+            if (isTransitioning) return;
+            isTransitioning = true;
+            currentIndex = newIndex;
+            updatePosition();
+        };
+
+        // 4. Manejar el "salto" invisible al final de la transición
+        carouselTrack.addEventListener('transitionend', () => {
+            isTransitioning = false;
+            if (allSlides[currentIndex].id === 'first-clone') {
+                currentIndex = 1;
+                updatePosition(false);
+            } else if (allSlides[currentIndex].id === 'last-clone') {
+                currentIndex = originalSlides.length;
+                updatePosition(false);
+            }
+        });
+
+        // 5. Autoplay
         const startAutoSlide = () => {
             autoSlideInterval = setInterval(() => {
-                moveToSlide(carouselTrack, currentIndex + 1);
+                moveToSlide(currentIndex + 1);
             }, 3000); // Change slide every 3 seconds
         };
 
         const stopAutoSlide = () => {
             clearInterval(autoSlideInterval);
         };
-
-        // Initialize the first slide as current
-        carouselSlides[0].classList.add('current-slide');
-        startAutoSlide(); // Start auto-play
-
-        // Update slideWidth on resize
+        
+        // 6. Manejar redimensionamiento de ventana
         window.addEventListener('resize', () => {
-            stopAutoSlide(); // Stop auto-play during resize
-            slideWidth = carouselSlides[0].getBoundingClientRect().width;
-            // Recalculate transform to keep current slide in view
-            carouselTrack.style.transform = 'translateX(-' + (slideWidth * currentIndex) + 'px)';
-            startAutoSlide(); // Restart auto-play after resize
+            stopAutoSlide();
+            slideWidth = carouselContainer.getBoundingClientRect().width;
+            updatePosition(false);
+            startAutoSlide();
         });
 
-        // --- Swipe Functionality ---
+        // 7. Funcionalidad de Swipe
         let touchStartX = 0;
         let touchEndX = 0;
         const swipeThreshold = 50; // Minimum pixels to register a swipe
 
         carouselContainer.addEventListener('touchstart', (e) => {
-            stopAutoSlide(); // Stop auto-play on touch
+            stopAutoSlide();
+            isTransitioning = true; // Pausar el listener de 'transitionend' durante el swipe
             touchStartX = e.touches[0].clientX;
         });
 
-        carouselContainer.addEventListener('touchmove', (e) => {
-            touchEndX = e.touches[0].clientX;
-            // Optional: Add visual feedback for dragging
-            // e.preventDefault(); // Prevent scrolling if you want pure horizontal swipe
-        });
-
         carouselContainer.addEventListener('touchend', () => {
+            isTransitioning = false;
+            touchEndX = e.changedTouches[0].clientX;
             const diffX = touchStartX - touchEndX;
 
             if (Math.abs(diffX) > swipeThreshold) {
                 if (diffX > 0) { // Swiped left
-                    moveToSlide(carouselTrack, currentIndex + 1);
+                    moveToSlide(currentIndex + 1);
                 } else { // Swiped right
-                    moveToSlide(carouselTrack, currentIndex - 1);
+                    moveToSlide(currentIndex - 1);
                 }
             }
             startAutoSlide(); // Restart auto-play after swipe
         });
+
+        // Iniciar todo
+        updatePosition(false);
+        startAutoSlide();
     }
 
     // Initial call to apply validation on page load
