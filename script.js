@@ -346,8 +346,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- LÓGICA DE ENVÍO DEL FORMULARIO ---
     form.addEventListener('submit', async (event) => {
         event.preventDefault(); // Prevenir el envío tradicional del formulario
-
         const submitButton = form.querySelector('button[type="submit"]');
+
+        // Re-validar la edad justo antes de enviar
+        checkAge();
+
+        // Si la validación (p. ej. de edad) deshabilitó el botón, no continuar.
+        if (submitButton.disabled) {
+            console.warn("Envío bloqueado por validación (ej. edad insuficiente).");
+            return;
+        }
+
         const originalButtonText = submitButton.innerHTML;
         submitButton.disabled = true;
         submitButton.innerHTML = 'Enviando...';
