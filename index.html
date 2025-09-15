@@ -25,24 +25,24 @@
 
             <!-- Formulario (oculto al inicio) -->
             <form id="form" class="hidden">
-                <label>Nombres y Apellidos (Completos)</label>
-                <input type="text" name="nombre" required placeholder="Nombres y Apellidos Completos" />
+                <label for="nombre">Nombres y Apellidos (Completos)</label>
+                <input type="text" id="nombre" name="nombre" required placeholder="Nombres y Apellidos Completos" />
 
-                <label>Tipo de Documento</label>
+                <label for="tipo_documento">Tipo de Documento</label>
                 <select name="tipo_documento" id="tipo_documento" required>
                     <option value="">Seleccione Tipo...</option>
                     <option value="CC">Cédula de Ciudadanía</option>
                     <option value="PEP">P.E.P</option>
                     <option value="CE">Cédula de Extranjería</option>
                 </select>
-                <label>Número de Documento</label>
+                <label for="numero_documento">Número de Documento</label>
                 <input type="text" name="numero_documento" id="numero_documento" required />
 
-                <label>Fecha de expedición del documento</label>
-                <input type="date" name="fecha_expedicion" required />
+                <label for="fecha_expedicion">Fecha de expedición del documento</label>
+                <input type="date" id="fecha_expedicion" name="fecha_expedicion" required />
 
-                <label>Fecha de nacimiento</label>
-                <input type="date" name="fecha_nacimiento" required />
+                <label for="fecha_nacimiento">Fecha de nacimiento</label>
+                <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" required />
 
                 <label>Departamento y Ciudad de Residencia</label>
                 <div class="location-selects">
@@ -54,17 +54,17 @@
                     </select>
                 </div>
 
-                <label>Dirección de residencia</label>
-                <input type="text" name="direccion" required placeholder="Ej: Calle 10 # 4-2, Apto 101" />
+                <label for="direccion">Dirección de residencia</label>
+                <input type="text" id="direccion" name="direccion" required placeholder="Ej: Calle 10 # 4-2, Apto 101" />
 
-                <label>Número de teléfono principal</label>
-                <input type="tel" name="telefono_principal" required pattern="[0-9]{7,10}"
+                <label for="telefono_principal">Número de teléfono principal</label>
+                <input type="tel" id="telefono_principal" name="telefono_principal" required pattern="[0-9]{7,10}"
                     placeholder="Ej: 3001234567" />
 
-                <label>Número de teléfono (familiar)</label>
-                <input type="tel" name="telefono_familiar" pattern="[0-9]{7,10}" placeholder="Ej: 3109876543" />
+                <label for="telefono_familiar">Número de teléfono (familiar)</label>
+                <input type="tel" id="telefono_familiar" name="telefono_familiar" pattern="[0-9]{7,10}" placeholder="Ej: 3109876543" />
 
-                <label>¿Tiene correo electrónico?</label>
+                <label for="tiene_correo">¿Tiene correo electrónico?</label>
                 <select name="tiene_correo" id="tiene_correo" required>
                     <option value="">Seleccione...</option>
                     <option value="Si">Sí</option>
@@ -72,11 +72,11 @@
                 </select>
 
                 <div id="correo-container" style="display: none;">
-                    <label>Correo electrónico</label>
+                    <label for="correo">Correo electrónico</label>
                     <input type="email" name="correo" id="correo" placeholder="ejemplo@correo.com" />
                 </div>
 
-                <label>Estado civil</label>
+                <label for="estado_civil">Estado civil</label>
                 <select name="estado_civil" required>
                     <option value="">Seleccione...</option>
                     <option value="Soltero">Soltero(a)</option>
@@ -85,8 +85,8 @@
                     <option value="Divorciado">Divorciado(a)</option>
                     <option value="Viudo">Viudo(a)</option>
                 </select>
-                <label>Ocupación actual</label>
-                <select name="ocupacion" required>
+                <label for="ocupacion">Ocupación actual</label>
+                <select id="ocupacion" name="ocupacion" required>
                     <option value="">Seleccione...</option>
                     <option value="Empleado">Empleado(a)</option>
                     <option value="Independiente">Independiente</option>
@@ -94,8 +94,8 @@
                     <option value="Pensionado">Pensionado(a)</option>
                     <option value="Otro">Otro</option>
                 </select>
-                <label>¿Actualmente recibe ingresos de pensión?</label>
-                <select name="recibe_pension" id="recibe_pension" required>
+                <label for="recibe_pension">¿Actualmente recibe ingresos de pensión?</label>
+                <select id="recibe_pension" name="recibe_pension" required>
                     <option value="">Seleccione...</option>
                     <option value="Si">Sí</option>
                     <option value="No">No</option>
@@ -103,8 +103,8 @@
                     <option value="Sustitución">Sustitución pensional</option>
                 </select>
                 <div id="fondo-pension-container" style="display: none;">
-                    <label>En caso de estar pensionado(a), su pensión corresponde a:</label>
-                    <select name="fondo_pension" id="fondo_pension">
+                    <label for="fondo_pension">En caso de estar pensionado(a), su pensión corresponde a:</label>
+                    <select id="fondo_pension" name="fondo_pension">
                         <option value="">Seleccione...</option>
                         <option value="Protección">Protección</option>
                         <option value="Porvenir">Porvenir</option>
@@ -117,13 +117,13 @@
                         <option value="Otro">Otro</option>
                     </select>
                 </div>
-                <label>¿Tiene familiares viviendo en el extranjero?</label>
-                <select name="familia_extranjero" required>
+                <label for="familia_extranjero">¿Tiene familiares viviendo en el extranjero?</label>
+                <select id="familia_extranjero" name="familia_extranjero" required>
                     <option value="">Seleccione...</option>
                     <option value="Si">Sí</option>
                     <option value="No">No</option>
                 </select>
-                <label>¿Tiene alguna mascota en casa?</label>
+                <label for="mascota">¿Tiene alguna mascota en casa?</label>
                 <select name="mascota" required>
                     <option value="">Seleccione...</option>
                     <option value="Si">Sí</option>

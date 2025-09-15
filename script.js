@@ -209,16 +209,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitButton = form.querySelector('button[type="submit"]');
 
     function checkAge() {
+        const MIN_AGE = 18; // Edad mínima para la campaña
         const birthDate = new Date(fechaNacimientoInput.value);
         const today = new Date();
-        if (isNaN(birthDate.getTime())) {
-            // Invalid date
+        if (isNaN(birthDate.getTime()) || !fechaNacimientoInput.value) {
+            // Si la fecha es inválida o está vacía, no hacemos nada.
+            // La validación 'required' del HTML se encargará del campo vacío.
+            msg.textContent = '';
+            submitButton.disabled = false;
             return;
         }
         let age = today.getFullYear() - birthDate.getFullYear();
         const monthDifference = today.getMonth() - birthDate.getMonth();
         if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
             age--;
+        }
+
+        if (age < MIN_AGE) {
+            msg.textContent = `Esta campaña es para personas mayores de ${MIN_AGE} años.`;
+            msg.style.color = 'red';
+            submitButton.disabled = true;
+        } else {
+            msg.textContent = '';
+            submitButton.disabled = false;
         }
     }
 
@@ -309,7 +322,7 @@ document.addEventListener('DOMContentLoaded', () => {
             touchStartX = e.touches[0].clientX;
         });
 
-        carouselContainer.addEventListener('touchend', () => {
+        carouselContainer.addEventListener('touchend', (e) => {
             isTransitioning = false;
             touchEndX = e.changedTouches[0].clientX;
             const diffX = touchStartX - touchEndX;
@@ -324,10 +337,97 @@ document.addEventListener('DOMContentLoaded', () => {
             startAutoSlide(); // Restart auto-play after swipe
         });
 
+        // 8. Botones de Navegación
+        const prevBtn = document.querySelector('.prev-btn');
+        const nextBtn = document.querySelector('.next-btn');
+
+        if (prevBtn && nextBtn) {
+            prevBtn.addEventListener('click', () => {
+                stopAutoSlide();
+                moveToSlide(currentIndex - 1);
+                startAutoSlide();
+            });
+
+            nextBtn.addEventListener('click', () => {
+                stopAutoSlide();
+                moveToSlide(currentIndex + 1);
+                startAutoSlide();
+            });
+        }
+
         // Iniciar todo
         updatePosition(false);
         startAutoSlide();
     }
+
+    // --- LÓGICA DE ENVÍO DEL FORMULARIO ---
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault(); // Prevenir el envío tradicional del formulario
+
+        const submitButton = form.querySelector('button[type="submit"]');
+        const originalButtonText = submitButton.innerHTML;
+        submitButton.disabled = true;
+        submitButton.innerHTML = 'Enviando...';
+
+        // Recolectar los datos del formulario
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        // Asegurarse de que el checkbox envíe un valor de texto
+        data.privacidad = formData.has('privacidad') ? 'Aceptado' : 'No Aceptado';
+
+        try {
+            // Enviar los datos a la Netlify Function
+            const response = await fetch('/.netlify/functions/submit-form', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+
+            // Si la respuesta no es exitosa (ej. 404, 500), manejar el error.
+            if (!response.ok) {
+                let errorMessage = `Ocurrió un error en el servidor (Código: ${response.status}).`;
+                // Intentar leer un mensaje de error específico del cuerpo de la respuesta
+                try {
+                    const errorResult = await response.json();
+                    errorMessage = errorResult.message || errorMessage;
+                } catch (e) {
+                    // Si el cuerpo no es JSON (ej. una página de error 404 en HTML)
+                    if (response.status === 404) {
+                        errorMessage = "Error: No se pudo encontrar el servicio de envío (404). Verifica que la función de Netlify se haya desplegado correctamente.";
+                    }
+                }
+                throw new Error(errorMessage);
+            }
+
+            const result = await response.json();
+
+            // Éxito al enviar
+            modalMessage.textContent = result.message || '¡Formulario enviado con éxito!';
+            modalIcon.className = 'modal-icon success';
+            modalIconI.className = 'fas fa-check-circle';
+            successModal.classList.add('visible');
+            form.reset(); // Limpiar el formulario
+            
+            // Ocultar el formulario y mostrar el botón inicial de nuevo
+            form.classList.add('hidden');
+            showBtn.style.display = 'block';
+
+        } catch (error) {
+            // Error de red o cualquier otro error
+            console.error('Error al enviar el formulario:', error); // Log para depuración
+            modalMessage.textContent = error.message || 'No se pudo enviar el formulario. Por favor, intente de nuevo.';
+            modalIcon.className = 'modal-icon error';
+            modalIconI.className = 'fas fa-times-circle';
+            successModal.classList.add('visible');
+        } finally {
+            // Restaurar el botón de envío
+            submitButton.disabled = false;
+            submitButton.innerHTML = originalButtonText;
+        }
+    });
 
     // Initial call to apply validation on page load
     applyDocumentValidation();

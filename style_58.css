@@ -1,5 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap');
 
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
 :root {
     --primary-color: #005A9C;
     /* Azul Principal */
@@ -94,7 +100,6 @@ select {
     font-size: 15px;
     border: 1px solid var(--border-color);
     border-radius: 8px;
-    box-sizing: border-box;
     background-color: #fdfdfd;
 }
 
@@ -364,15 +369,34 @@ footer a:hover {
 }
 
 .carousel-button {
-    display: none; /* Hide carousel buttons */
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(255, 255, 255, 0.7);
+    color: var(--primary-color);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.carousel-button:hover {
+    background-color: white;
+    transform: translateY(-50%) scale(1.1);
 }
 
 .prev-btn {
-    display: none; /* Hide prev button */
+    left: 15px;
 }
 
 .next-btn {
-    display: none; /* Hide next button */
+    right: 15px;
 }
 
 /* --- Responsive Adjustments --- */
@@ -411,15 +435,10 @@ footer a:hover {
     }
 
     .carousel-button {
-        display: none; /* Hide carousel buttons */
-    }
-
-    .prev-btn {
-        display: none; /* Hide prev button */
-    }
-
-    .next-btn {
-        display: none; /* Hide next button */
+        width: 35px;
+        height: 35px;
+        font-size: 18px;
+        /* Si prefieres ocultarlos en móvil, puedes usar: display: none; */
     }
 
     .logo {
@@ -473,18 +492,6 @@ footer a:hover {
 
     .carousel-slide img {
         max-width: 180px;
-    }
-
-    .carousel-button {
-        display: none; /* Hide carousel buttons */
-    }
-
-    .prev-btn {
-        display: none; /* Hide prev button */
-    }
-
-    .next-btn {
-        display: none; /* Hide next button */
     }
 
     .logo {
