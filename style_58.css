@@ -147,6 +147,22 @@ button[type="submit"]:hover {
     background: var(--accent-color-dark);
 }
 
+.location-fieldset {
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+.location-fieldset legend {
+    /* Mimic label style */
+    display: block;
+    width: 100%;
+    font-size: 15px;
+    margin: 12px 0 6px;
+    padding: 0;
+    color: var(--text-color);
+    font-weight: 700;
+}
 
 .msg {
     margin-top: 16px;
@@ -307,8 +323,7 @@ footer a:hover {
 
 .creator-credit a {
     color: var(--white);
-    text-decoration: underline; 
-    text-decoration: none; 
+    text-decoration: none;
 }
 
 /* --- Carousel Styles --- */

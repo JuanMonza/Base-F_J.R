@@ -44,15 +44,17 @@
                 <label for="fecha_nacimiento">Fecha de nacimiento</label>
                 <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" required />
 
-                <label>Departamento y Ciudad de Residencia</label>
-                <div class="location-selects">
-                    <select name="departamento" id="departamento" required>
-                        <option value="">Seleccione Departamento...</option>
-                    </select>
-                    <select name="ciudad" id="ciudad" required>
-                        <option value="">Seleccione Ciudad...</option>
-                    </select>
-                </div>
+                <fieldset class="location-fieldset">
+                    <legend>Departamento y Ciudad de Residencia</legend>
+                    <div class="location-selects">
+                        <select name="departamento" id="departamento" required>
+                            <option value="">Seleccione Departamento...</option>
+                        </select>
+                        <select name="ciudad" id="ciudad" required>
+                            <option value="">Seleccione Ciudad...</option>
+                        </select>
+                    </div>
+                </fieldset>
 
                 <label for="direccion">Dirección de residencia</label>
                 <input type="text" id="direccion" name="direccion" required placeholder="Ej: Calle 10 # 4-2, Apto 101" />
@@ -77,7 +79,7 @@
                 </div>
 
                 <label for="estado_civil">Estado civil</label>
-                <select name="estado_civil" required>
+                <select id="estado_civil" name="estado_civil" required>
                     <option value="">Seleccione...</option>
                     <option value="Soltero">Soltero(a)</option>
                     <option value="Casado">Casado(a)</option>
@@ -124,7 +126,7 @@
                     <option value="No">No</option>
                 </select>
                 <label for="mascota">¿Tiene alguna mascota en casa?</label>
-                <select name="mascota" required>
+                <select id="mascota" name="mascota" required>
                     <option value="">Seleccione...</option>
                     <option value="Si">Sí</option>
                     <option value="No">No</option>
@@ -196,7 +198,7 @@
                 <a href="#">Cookies</a>
             </p>
             <p>Versión 2.5</p>
-            <p class="creator-credit"><a href="https://github.com/JuanMonsalve" target="_blank">Creado por Juan Monsalve</a></p>
+            <p class="creator-credit">Creado por <a href="https://github.com/JuanMonsalve" target="_blank">Juan Monsalve</a></p>
         </div>
     </footer>
 

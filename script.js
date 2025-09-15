@@ -192,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitButton = form.querySelector('button[type="submit"]');
 
     function checkAge() {
-        const MIN_AGE = 58; // Edad mínima para la campaña
+        const MIN_AGE = 18; // Edad mínima para la campaña
         const birthDate = new Date(fechaNacimientoInput.value);
         const today = new Date();
         if (isNaN(birthDate.getTime()) || !fechaNacimientoInput.value) {
