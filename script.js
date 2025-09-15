@@ -365,8 +365,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
 
-        // Asegurarse de que el checkbox envíe un valor de texto
-        data.privacidad = formData.has('privacidad') ? 'Aceptado' : 'No Aceptado';
+        // Asegurarse de que el checkbox envíe un valor booleano (true/false)
+        data.privacidad = formData.has('privacidad');
 
         try {
             // Enviar los datos a la Netlify Function

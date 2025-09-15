@@ -23,11 +23,9 @@ exports.handler = async function(event, context) {
 
         if (error) {
             console.error("Error al insertar en Supabase:", error);
-            // Devolvemos el mensaje de error específico de Supabase para depuración
-            const detailedErrorMessage = `Error de Supabase: ${error.message}`;
             return {
                 statusCode: 500,
-                body: JSON.stringify({ message: detailedErrorMessage })
+                body: JSON.stringify({ message: "Error al guardar los datos." })
             };
         }
 
