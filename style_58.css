@@ -44,7 +44,7 @@ body {
 
 .container {
     max-width: 450px;
-    margin: 30px auto;
+    margin: 15px auto 10px;
     padding: 25px;
     background: rgba(255, 255, 255, 0.9);
     border-radius: 12px;
@@ -58,7 +58,7 @@ body {
 
 .logo {
     display: block;
-    margin: 0 auto 2rem auto;
+    margin: 0 auto;
     max-width: 451px;
     height: auto;
 }
@@ -328,7 +328,7 @@ footer a:hover {
 
 /* --- Carousel Styles --- */
 .carousel-section {
-    padding: 2rem 0;
+    padding: 0 0 2rem;
     text-align: center;
 }
 

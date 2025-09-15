@@ -18,7 +18,7 @@ exports.handler = async function(event, context) {
 
         // --- Insertar datos en Supabase ---
         const { data: insertedData, error } = await supabase
-            .from('registros_formulario')  // Nombre de la tabla en Supabase
+            .from('registros_formulario')
             .insert([data]); // Inserta los datos del formulario
 
         if (error) {
