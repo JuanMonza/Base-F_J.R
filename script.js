@@ -2,23 +2,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM Content Loaded. Script is running.');
 
-    // --- INICIALIZACIÓN DE GRANIM.JS PARA EL FOOTER ---
-    // Asegúrate de que Granim.js esté cargado antes de intentar inicializarlo
-    if (typeof Granim !== 'undefined') {
-        new Granim({
-            element: '#granim-canvas',
-            direction: 'left-right',
-            states: {
-                "default-state": {
-                    gradients: [['#2C3E50', '#3498DB'], ['#3498DB', '#8E44AD'], ['#8E44AD', '#2C3E50']],
-                    transitionSpeed: 5000
-                }
-            }
-        });
-    } else {
-        console.warn('Granim.js no está cargado. Asegúrate de incluir la librería.');
-    }
-
     // --- ELEMENTOS DEL DOM ---
     const showBtn = document.getElementById("showFormBtn");
     const form = document.getElementById("form");
@@ -209,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitButton = form.querySelector('button[type="submit"]');
 
     function checkAge() {
-        const MIN_AGE = 18; // Edad mínima para la campaña
+        const MIN_AGE = 58; // Edad mínima para la campaña
         const birthDate = new Date(fechaNacimientoInput.value);
         const today = new Date();
         if (isNaN(birthDate.getTime()) || !fechaNacimientoInput.value) {

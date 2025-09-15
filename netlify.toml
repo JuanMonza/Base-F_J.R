@@ -1,2 +1,8 @@
+[build]
+  # Directorio que contiene los archivos estáticos (index.html, etc.)
+  publish = "/"
+  # Directorio donde se encuentran las funciones de Netlify
+  functions = "netlify/functions"
+
 [[plugins]]
-package = "@netlify/plugin-functions-install-core"
+  package = "@netlify/plugin-functions-install-core"
