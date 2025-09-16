@@ -131,6 +131,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const tipoDocumentoSelect = document.getElementById('tipo_documento');
     const numeroDocumentoInput = document.getElementById('numero_documento');
 
+    // --- LÓGICA DE VALIDACIÓN DE NÚMEROS DE TELÉFONO ---
+    const telefonoPrincipalInput = document.getElementById('telefono_principal');
+    const telefonoFamiliarInput = document.getElementById('telefono_familiar');
+
+    const validatePhoneLength = (event) => {
+        const input = event.target;
+        const value = input.value;
+
+        // Permitir que el campo esté vacío para que la validación 'required' se encargue
+        if (value.length === 0) {
+            input.setCustomValidity('');
+            return;
+        }
+
+        if (value.length !== 10) {
+            input.setCustomValidity('El número de teléfono debe tener 10 dígitos.');
+        } else {
+            input.setCustomValidity('');
+        }
+    };
+
+    telefonoPrincipalInput.addEventListener('input', validatePhoneLength);
+    telefonoFamiliarInput.addEventListener('input', validatePhoneLength);
+
     const forceNumericInput = (event) => {
         event.target.value = event.target.value.replace(/[^0-9]/g, '');
     }
