@@ -155,7 +155,7 @@ export default async function handler(req, res) {
     try {
         const data = req.body; // En Vercel, el body ya viene parseado
 
-        console.log("Datos recibidos:", data);
+        console.log(`✅ Formulario recibido desde ${clientIP}`);
 
         // PROTECCIÓN 2: Validar tamaño del payload
         const payloadSize = JSON.stringify(data).length;
@@ -175,21 +175,14 @@ export default async function handler(req, res) {
             return res.status(400).json({ message: "Solicitud inválida" });
         }
 
-        // PROTECCIÓN 4: Validación básica de formato con logging detallado
-        console.log(`🔍 Validando datos: nombre="${data.nombre}", documento="${data.numero_documento}"`);
-        
-        const nombreValid = isValidString(data.nombre);
-        const documentoValid = isValidDocument(data.numero_documento);
-        
-        console.log(`📝 Validación nombre: ${nombreValid}, documento: ${documentoValid}`);
-        
-        if (!nombreValid && data.nombre) {
-            console.log(`🚫 Nombre inválido: "${data.nombre}" desde ${clientIP}`);
+        // PROTECCIÓN 4: Validación básica de formato
+        if (!isValidString(data.nombre) && data.nombre) {
+            console.log(`🚫 Nombre inválido desde ${clientIP}`);
             return res.status(400).json({ message: "Formato de nombre inválido" });
         }
         
-        if (!documentoValid && data.numero_documento) {
-            console.log(`🚫 Documento inválido: "${data.numero_documento}" desde ${clientIP}`);
+        if (!isValidDocument(data.numero_documento) && data.numero_documento) {
+            console.log(`🚫 Documento inválido desde ${clientIP}`);
             return res.status(400).json({ message: "Formato de documento inválido" });
         }
 
