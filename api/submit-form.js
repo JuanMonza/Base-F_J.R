@@ -9,6 +9,7 @@ const SECURITY_CONFIG = {
     MAX_SUBMISSIONS_PER_DOC: 1,      // Máximo 1 envío por documento por día
     TIME_WINDOW: 60 * 60 * 1000,     // 1 hora en milisegundos
     DOC_TIME_WINDOW: 24 * 60 * 60 * 1000, // 24 horas
+    MAX_PAYLOAD_SIZE: 10240,          // 10KB máximo
     HONEYPOT_FIELD: 'website',        // Campo trampa para bots
     MIN_FORM_TIME: 10000,             // Mínimo 10 segundos para llenar el form
     MAX_FORM_TIME: 30 * 60 * 1000     // Máximo 30 minutos
@@ -43,6 +44,37 @@ function validateDocumentNumber(type, number) {
         default:
             return false;
     }
+}
+
+// Funciones de validación adicionales
+function isValidString(str) {
+    if (!str || typeof str !== 'string') return false;
+    // Solo letras, espacios, acentos y algunos caracteres especiales
+    return /^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s\-\.,']{1,100}$/.test(str.trim());
+}
+
+function isValidDocument(doc) {
+    if (!doc || typeof doc !== 'string') return false;
+    // Solo números, longitud entre 5 y 20 caracteres
+    return /^[0-9]{5,20}$/.test(doc.trim());
+}
+
+// Funciones de sanitización
+function sanitizeString(str) {
+    if (!str || typeof str !== 'string') return null;
+    
+    return str
+        .trim()
+        .replace(/<[^>]*>/g, '') // Remover HTML tags
+        .replace(/[<>\"'&]/g, '') // Remover caracteres peligrosos
+        .slice(0, 200); // Limitar longitud
+}
+
+function sanitizeEmail(email) {
+    if (!email || typeof email !== 'string') return null;
+    
+    const sanitized = email.trim().toLowerCase().slice(0, 100);
+    return isValidEmail(sanitized) ? sanitized : null;
 }
 
 export default async function handler(req, res) {
