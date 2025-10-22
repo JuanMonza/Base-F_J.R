@@ -46,35 +46,42 @@ function validateDocumentNumber(type, number) {
     }
 }
 
-// Funciones de validación adicionales
+// Funciones de validación adicionales (más permisivas)
 function isValidString(str) {
-    if (!str || typeof str !== 'string') return false;
-    // Solo letras, espacios, acentos y algunos caracteres especiales
-    return /^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s\-\.,']{1,100}$/.test(str.trim());
+    if (!str || typeof str !== 'string') return true; // Permitir strings vacíos
+    const trimmed = str.trim();
+    if (trimmed.length === 0) return true; // Permitir strings vacíos después del trim
+    // Permitir letras, números, espacios, acentos y caracteres especiales comunes
+    return /^[a-zA-Z0-9áéíóúüñÁÉÍÓÚÜÑ\s\-\.,'#@()\[\]&+:;]{1,200}$/.test(trimmed);
 }
 
 function isValidDocument(doc) {
     if (!doc || typeof doc !== 'string') return false;
-    // Solo números, longitud entre 5 y 20 caracteres
-    return /^[0-9]{5,20}$/.test(doc.trim());
+    const trimmed = doc.trim();
+    // Permitir números y algunos caracteres especiales, longitud entre 3 y 25 caracteres
+    return /^[0-9\-\.]{3,25}$/.test(trimmed);
 }
 
-// Funciones de sanitización
+// Funciones de sanitización (más robustas)
 function sanitizeString(str) {
-    if (!str || typeof str !== 'string') return null;
+    if (!str) return null; // Manejar null, undefined, ""
+    if (typeof str !== 'string') return String(str).slice(0, 200); // Convertir a string
     
-    return str
+    const cleaned = str
         .trim()
         .replace(/<[^>]*>/g, '') // Remover HTML tags
         .replace(/[<>\"'&]/g, '') // Remover caracteres peligrosos
         .slice(0, 200); // Limitar longitud
+        
+    return cleaned || null; // Retornar null si queda vacío
 }
 
 function sanitizeEmail(email) {
-    if (!email || typeof email !== 'string') return null;
+    if (!email) return null;
+    if (typeof email !== 'string') return null;
     
     const sanitized = email.trim().toLowerCase().slice(0, 100);
-    return isValidEmail(sanitized) ? sanitized : null;
+    return (sanitized && isValidEmail(sanitized)) ? sanitized : null;
 }
 
 export default async function handler(req, res) {
@@ -168,10 +175,22 @@ export default async function handler(req, res) {
             return res.status(400).json({ message: "Solicitud inválida" });
         }
 
-        // PROTECCIÓN 4: Validación básica de formato
-        if (!isValidString(data.nombre) || !isValidDocument(data.numero_documento)) {
-            console.log(`🚫 Datos con formato inválido desde ${clientIP}`);
-            return res.status(400).json({ message: "Formato de datos inválido" });
+        // PROTECCIÓN 4: Validación básica de formato con logging detallado
+        console.log(`🔍 Validando datos: nombre="${data.nombre}", documento="${data.numero_documento}"`);
+        
+        const nombreValid = isValidString(data.nombre);
+        const documentoValid = isValidDocument(data.numero_documento);
+        
+        console.log(`📝 Validación nombre: ${nombreValid}, documento: ${documentoValid}`);
+        
+        if (!nombreValid && data.nombre) {
+            console.log(`🚫 Nombre inválido: "${data.nombre}" desde ${clientIP}`);
+            return res.status(400).json({ message: "Formato de nombre inválido" });
+        }
+        
+        if (!documentoValid && data.numero_documento) {
+            console.log(`🚫 Documento inválido: "${data.numero_documento}" desde ${clientIP}`);
+            return res.status(400).json({ message: "Formato de documento inválido" });
         }
 
         // PROTECCIÓN 5: Rate limiting por documento (solo 1 por día por documento)
