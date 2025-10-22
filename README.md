@@ -29,7 +29,7 @@ Además, incluye un carrusel de imágenes para promocionar la campaña "Actualiz
 *   **Librerías:**
     *   Flatpickr.js: Para los selectores de fecha.
     *   Font Awesome: Para los iconos.
-*   **Alojamiento:** Vercel (migrado desde Netlify)
+
 
 ## 🚀 Instalación y Puesta en Marcha Local
 
@@ -39,14 +39,6 @@ Para ejecutar este proyecto en tu máquina local, sigue estos pasos:
 
 *   Node.js (versión 18.x o superior)
 *   Vercel CLI: `npm install -g vercel`
-*   Una cuenta gratuita en Supabase.
-
-### 1. Clonar el Repositorio
-
-```bash
-git clone https://github.com/JuanMonza/Base-F_J.R
-cd  Base-F_J.R
-```
 
 ### 2. Configurar Supabase
 
