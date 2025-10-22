@@ -24,12 +24,12 @@ Además, incluye un carrusel de imágenes para promocionar la campaña "Actualiz
 ## 🛠️ Tecnologías Utilizadas
 
 *   **Frontend:** HTML5, CSS3, JavaScript (ES6+)
-*   **Backend:** Node.js (a través de Netlify Functions)
+*   **Backend:** Node.js (a través de Vercel Serverless Functions)
 *   **Base de Datos:** Supabase
 *   **Librerías:**
     *   Flatpickr.js: Para los selectores de fecha.
     *   Font Awesome: Para los iconos.
-*   **Alojamiento:** Netlify
+*   **Alojamiento:** Vercel (migrado desde Netlify)
 
 ## 🚀 Instalación y Puesta en Marcha Local
 
@@ -38,7 +38,7 @@ Para ejecutar este proyecto en tu máquina local, sigue estos pasos:
 ### Prerrequisitos
 
 *   Node.js (versión 18.x o superior)
-*   Netlify CLI: `npm install netlify-cli -g`
+*   Vercel CLI: `npm install -g vercel`
 *   Una cuenta gratuita en Supabase.
 
 ### 1. Clonar el Repositorio

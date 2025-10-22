@@ -393,8 +393,8 @@ document.addEventListener('DOMContentLoaded', () => {
         data.privacidad = formData.has('privacidad');
 
         try {
-            // Enviar los datos a la Netlify Function
-            const response = await fetch('/.netlify/functions/submit-form', {
+            // Enviar los datos a la función de Vercel
+            const response = await fetch('/api/submit-form', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -412,7 +412,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } catch (e) {
                     // Si el cuerpo no es JSON (ej. una página de error 404 en HTML)
                     if (response.status === 404) {
-                        errorMessage = "Error: No se pudo encontrar el servicio de envío (404). Verifica que la función de Netlify se haya desplegado correctamente.";
+                        errorMessage = "Error: No se pudo encontrar el servicio de envío (404). Verifica que la función de Vercel se haya desplegado correctamente.";
                     }
                 }
                 throw new Error(errorMessage);

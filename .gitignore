@@ -1,5 +1,55 @@
-# Ignore node modules
+# Dependencies
 node_modules/
-# Local Netlify folder
-.netlify
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Production builds
+.next/
+out/
+build/
+dist/
+
+# Environment variables (SENSIBLE - NO SUBIR)
 .env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Vercel
+.vercel
+
+# Local Netlify folder (legacy)
+.netlify
+
+# Archivos privados y sensibles (NO SUBIR A GITHUB)
+INSTRUCCIONES_MIGRACION.md
+create_table.sql
+deploy.ps1
+deploy.sh
+.env.example
+
+# Archivos temporales de migración
+migration_*
+backup_*
+temp_*
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+logs
+*.log
