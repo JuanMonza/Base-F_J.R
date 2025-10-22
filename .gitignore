@@ -30,10 +30,12 @@ deploy.ps1
 deploy.sh
 .env.example
 
-# Archivos temporales de migración
+# Archivos temporales de migración y pruebas
 migration_*
 backup_*
 temp_*
+*-simple.js
+*-test.js
 
 # OS generated files
 .DS_Store

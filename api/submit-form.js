@@ -1,16 +1,22 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Inicializa el cliente de Supabase usando las variables de entorno
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
 export default async function handler(req, res) {
-    // Logs de debug
-    console.log('🚀 Function called');
-    console.log('📄 Method:', req.method);
-    console.log('🔑 SUPABASE_URL:', supabaseUrl ? 'Found' : 'Missing');
-    console.log('🔑 SUPABASE_ANON_KEY:', supabaseAnonKey ? 'Found' : 'Missing');
+    // Obtener variables de entorno de Supabase (múltiples opciones de la integración)
+    const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    
+    // Log básico para monitoreo
+    console.log('📝 Formulario recibido:', req.method);
+    
+    // Validar que las variables de entorno estén disponibles
+    if (!supabaseUrl || !supabaseAnonKey) {
+        console.error('❌ Error de configuración de Supabase');
+        return res.status(500).json({ 
+            message: "Error de configuración del servidor" 
+        });
+    }
+    
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
     
     // Configurar CORS
     res.setHeader('Access-Control-Allow-Credentials', true);
@@ -76,8 +82,6 @@ export default async function handler(req, res) {
                 error: error.message 
             });
         }
-
-        console.log("Datos guardados en Supabase:", insertedData);
 
         return res.status(200).json({ 
             message: "Datos recibidos y guardados correctamente. ¡Gracias!" 
