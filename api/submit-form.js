@@ -5,7 +5,7 @@ const submissions = new Map();
 
 // Configuración de seguridad
 const SECURITY_CONFIG = {
-    MAX_SUBMISSIONS_PER_IP: 5,        // Máximo 5 envíos por IP por hora
+    MAX_SUBMISSIONS_PER_IP: 80,       // Máximo 80 envíos por IP por hora
     MAX_SUBMISSIONS_PER_DOC: 1,      // Máximo 1 envío por documento por día
     TIME_WINDOW: 60 * 60 * 1000,     // 1 hora en milisegundos
     DOC_TIME_WINDOW: 24 * 60 * 60 * 1000, // 24 horas

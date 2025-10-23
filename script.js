@@ -389,8 +389,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
 
-        // Asegurarse de que el checkbox envíe un valor booleano (true/false)
+        // Asegurarse de que los checkboxes envíen valores booleanos (true/false)
         data.privacidad = formData.has('privacidad');
+        data.familia_extranjero = formData.has('familia_extranjero');
+        data.mascota = formData.has('mascota');
 
         try {
             // Enviar los datos a la función de Vercel
