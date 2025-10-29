@@ -219,7 +219,10 @@ export default async function handler(req, res) {
             correo: sanitizeEmail(data.correo),
             estado_civil: sanitizeString(data.estado_civil),
             ocupacion: sanitizeString(data.ocupacion),
-            recibe_pension: data.recibe_pension === 'true' || data.recibe_pension === true,
+            recibe_pension:
+                (data.recibe_pension === true || data.recibe_pension === false)
+                    ? data.recibe_pension
+                    : sanitizeString(data.recibe_pension),
             fondo_pension: sanitizeString(data.fondo_pension),
             familia_extranjero: data.familia_extranjero === 'true' || data.familia_extranjero === true,
             mascota: data.mascota === 'true' || data.mascota === true,

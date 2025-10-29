@@ -395,6 +395,15 @@ document.addEventListener('DOMContentLoaded', () => {
         data.mascota = (formData.get('mascota') === 'Si');
         data.tiene_correo = (formData.get('tiene_correo') === 'Si');
 
+        // Procesar recibe_pension como booleano solo para 'Si' y 'No'
+        if (formData.get('recibe_pension') === 'Si') {
+            data.recibe_pension = true;
+        } else if (formData.get('recibe_pension') === 'No') {
+            data.recibe_pension = false;
+        } else {
+            data.recibe_pension = formData.get('recibe_pension'); // En trámite, Sustitución pensional, etc.
+        }
+
         try {
             // Enviar los datos a la función de Vercel
             const response = await fetch('/api/submit-form', {
