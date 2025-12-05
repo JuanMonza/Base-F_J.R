@@ -2,11 +2,12 @@
   "name": "base-f-jr-vercel",
   "version": "1.0.0",
   "description": "Proyecto migrado a Vercel con Supabase",
+  "type": "module",
   "main": "index.html",
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": "20.x"
   }
 }

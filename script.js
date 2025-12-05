@@ -416,19 +416,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Si la respuesta no es exitosa (ej. 404, 500), manejar el error.
             if (!response.ok) {
-                // Si el servidor responde con un 409 Conflict, es porque el documento ya existe.
-                if (response.status === 409) {
-                    const errorResult = await response.json();
-                    throw new Error(errorResult.message || 'Este número de documento ya ha sido registrado.');
-                }
-
                 let errorMessage = `Ocurrió un error en el servidor (Código: ${response.status}).`;
                 // Intentar leer un mensaje de error específico del cuerpo de la respuesta
                 try {
                     const errorResult = await response.json();
                     errorMessage = errorResult.message || errorMessage;
                 } catch (e) {
-                    // Si el cuerpo no es JSON (ej. una página de error 404 en HTML)
+                    // Si el cuerpo no es JSON (ej. una página de error 404 en HTML),
+                    // mostramos un mensaje genérico para ese caso.
                     if (response.status === 404) {
                         errorMessage = "Error: No se pudo encontrar el servicio de envío (404). Verifica que la función de Vercel se haya desplegado correctamente.";
                     }

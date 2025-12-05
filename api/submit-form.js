@@ -236,6 +236,14 @@ export default async function handler(req, res) {
 
         if (error) {
             console.error("Error al insertar en Supabase:", error);
+
+            // Detectar error de duplicado (unique constraint violation)
+            if (error.code === '23505') { // Código de error estándar de PostgreSQL para 'unique_violation'
+                return res.status(409).json({ // 409 Conflict es el código HTTP apropiado
+                    message: "Este número de documento ya ha sido registrado."
+                });
+            }
+
             return res.status(500).json({ 
                 message: "Error al guardar los datos en la base de datos.",
                 error: error.message 
