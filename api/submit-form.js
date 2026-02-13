@@ -1,10 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Configurar cliente de Supabase
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
-
 // Cache para rate limiting en memoria (en producción usarías Redis)
 const submissions = new Map();
 
@@ -98,17 +93,22 @@ export default async function handler(req, res) {
     
     // Obtener variables de entorno de Supabase
     const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     
     // Validar que las variables de entorno estén disponibles
-    if (!supabaseUrl || !supabaseAnonKey) {
-        console.error('❌ Error de configuración de Supabase');
+    if (!supabaseUrl || !supabaseKey) {
+        console.error('❌ Error de configuración de Supabase:', {
+            supabaseUrl: !!supabaseUrl,
+            supabaseKey: !!supabaseKey,
+            env_SUPABASE_URL: !!process.env.SUPABASE_URL,
+            env_SUPABASE_ANON_KEY: !!process.env.SUPABASE_ANON_KEY
+        });
         return res.status(500).json({ 
             message: "Error de configuración del servidor" 
         });
     }
     
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    const supabase = createClient(supabaseUrl, supabaseKey);
     
     // Configurar CORS restrictivo (solo tu dominio)
     const allowedOrigins = [
