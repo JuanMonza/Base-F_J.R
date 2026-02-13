@@ -89,7 +89,7 @@ export default async function handler(req, res) {
     const clientIP = getClientIP(req);
     
     // Log de seguridad
-    console.log(`🔒 Solicitud desde IP: ${clientIP}, Method: ${req.method}, User-Agent: ${req.headers['user-agent']?.substring(0, 50)}`);
+    console.log(`🔒 Solicitud desde IP: ${clientIP}, Method: ${req.method}, User-Agent: ${req.headers['user-agent']?.substring(0, 50)} - REPO PÚBLICO ✅`);
     
     // Obtener variables de entorno de Supabase
     const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
