@@ -157,11 +157,158 @@ const colombianLocations = {
 
     const forceNumericInput = (event) => {
         event.target.value = event.target.value.replace(/[^0-9]/g, '');
-    }
-    ;
+    };
 
-    // Always enforce numeric input
-    numeroDocumentoInput.addEventListener('input', forceNumericInput);
+    // ===== CONSULTA AUTOMÁTICA CON VERIFIK =====
+    let consultaTimeout = null;
+    let lastConsultedDocument = '';
+
+    const handleDocumentInput = async (event) => {
+        // Primero aplicar validación numérica
+        forceNumericInput(event);
+        
+        const numeroDoc = event.target.value;
+        const tipoDoc = tipoDocumentoSelect.value;
+        
+        // Solo consultar si el documento es válido y diferente al anterior
+        if (numeroDoc.length >= 6 && numeroDoc !== lastConsultedDocument && tipoDoc) {
+            // Cancelar consulta anterior si existe
+            if (consultaTimeout) {
+                clearTimeout(consultaTimeout);
+            }
+            
+            // Esperar 800ms después de que el usuario termine de escribir
+            consultaTimeout = setTimeout(async () => {
+                await consultarDatosAutomaticamente(numeroDoc, tipoDoc);
+            }, 800);
+        }
+    };
+
+    const consultarDatosAutomaticamente = async (numeroDoc, tipoDoc) => {
+        try {
+            console.log(`🔍 Consultando automáticamente: ${tipoDoc} ${numeroDoc}`);
+            
+            // Mostrar indicador de carga
+            mostrarIndicadorConsulta(true);
+            
+            const response = await fetch('/api/consultar-datos', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    numero_documento: numeroDoc,
+                    tipo_documento: tipoDoc
+                })
+            });
+
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                console.log('✅ Datos encontrados:', data.data);
+                autocompletarFormulario(data.data);
+                mostrarMensajeConsulta('✅ Datos encontrados y cargados automáticamente', 'success');
+                lastConsultedDocument = numeroDoc;
+            } else {
+                console.log('ℹ️ No se encontraron datos para el documento');
+                mostrarMensajeConsulta('ℹ️ Documento no encontrado en registros oficiales', 'info');
+            }
+            
+        } catch (error) {
+            console.error('❌ Error en consulta automática:', error);
+            mostrarMensajeConsulta('⚠️ Error al consultar datos', 'warning');
+        } finally {
+            mostrarIndicadorConsulta(false);
+        }
+    };
+
+    const autocompletarFormulario = (datos) => {
+        // Autocompletar campo de nombre si está disponible
+        if (datos.nombre) {
+            const nombreInput = document.getElementById('nombre');
+            if (nombreInput && !nombreInput.value) {
+                nombreInput.value = datos.nombre;
+                nombreInput.dispatchEvent(new Event('input')); // Trigger validation
+            }
+        }
+        
+        // Autocompletar fecha de nacimiento si está disponible
+        if (datos.fecha_nacimiento) {
+            const fechaInput = document.getElementById('fecha_nacimiento');
+            if (fechaInput && !fechaInput.value) {
+                fechaInput.value = datos.fecha_nacimiento;
+                fechaInput.dispatchEvent(new Event('change')); // Trigger validation
+            }
+        }
+        
+        // Se pueden agregar más campos aquí según lo que devuelva Verifik
+    };
+
+    const mostrarIndicadorConsulta = (mostrar) => {
+        let indicator = document.getElementById('consulta-indicator');
+        
+        if (mostrar && !indicator) {
+            // Crear indicador si no existe
+            indicator = document.createElement('div');
+            indicator.id = 'consulta-indicator';
+            indicator.innerHTML = '🔍 Consultando...';
+            indicator.style.cssText = `
+                position: absolute;
+                top: 100%;
+                left: 0;
+                background: #e3f2fd;
+                color: #1976d2;
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-size: 12px;
+                z-index: 1000;
+                border: 1px solid #bbdefb;
+                animation: pulse 1.5s infinite;
+            `;
+            numeroDocumentoInput.parentNode.style.position = 'relative';
+            numeroDocumentoInput.parentNode.appendChild(indicator);
+        } else if (!mostrar && indicator) {
+            indicator.remove();
+        }
+    };
+
+    const mostrarMensajeConsulta = (mensaje, tipo) => {
+        let messageDiv = document.getElementById('consulta-message');
+        
+        if (!messageDiv) {
+            messageDiv = document.createElement('div');
+            messageDiv.id = 'consulta-message';
+            numeroDocumentoInput.parentNode.appendChild(messageDiv);
+        }
+        
+        const colores = {
+            success: '#4caf50',
+            info: '#2196f3',
+            warning: '#ff9800'
+        };
+        
+        messageDiv.innerHTML = mensaje;
+        messageDiv.style.cssText = `
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: ${colores[tipo] || '#2196f3'};
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            z-index: 1000;
+            margin-top: 2px;
+        `;
+        
+        // Auto-ocultar después de 4 segundos
+        setTimeout(() => {
+            if (messageDiv) messageDiv.remove();
+        }, 4000);
+    };
+
+    // Always enforce numeric input AND auto-consulta con Verifik
+    numeroDocumentoInput.addEventListener('input', handleDocumentInput);
 
     function applyDocumentValidation() {
         const selectedType = tipoDocumentoSelect.value;
