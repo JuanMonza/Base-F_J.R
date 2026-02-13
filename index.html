@@ -20,31 +20,39 @@
             <h1>Formulario de Actualización de Afiliados</h1>
             <p>Complete la siguiente información</p>
 
-            <!-- SECCIÓN DE CONSULTA PREVIA -->
-            <div class="consulta-section">
-                <div class="consulta-header">
-                    <h2>¿Ya estás registrado? Consulta tu información</h2>
-                </div>
-                <div class="consulta-form-container">
-                    <div class="consulta-inputs">
-                        <select id="consulta_tipo_documento" class="consulta-input" required>
-                            <option value="">Tipo de Documento</option>
-                            <option value="CC">Cédula de Ciudadanía</option>
-                            <option value="PEP">P.E.P</option>
-                            <option value="CE">Cédula de Extranjería</option>
-                        </select>
-                        <input type="text" id="consulta_numero_documento" class="consulta-input" placeholder="Número de documento" />
-                    </div>
-                    <button type="button" id="btn-consultar" class="btn-consultar">Consultar</button>
-                </div>
-                <div id="consulta-resultado" class="consulta-resultado hidden"></div>
-            </div>
-
             <!-- Botón inicial -->
             <button id="showFormBtn">Diligenciar información</button>
 
             <!-- Formulario (oculto al inicio) -->
             <form id="form" class="hidden">
+                
+                <!-- SECCIÓN DE CONSULTA PREVIA (DENTRO DEL FORMULARIO) -->
+                <div class="consulta-section">
+                    <div class="consulta-header">
+                        <h2>¿Ya estás registrado? Consulta tu información</h2>
+                    </div>
+                    <div class="consulta-form-container">
+                        <div class="consulta-inputs">
+                            <select id="consulta_tipo_documento" class="consulta-input" required>
+                                <option value="">Tipo de Documento</option>
+                                <option value="CC">Cédula de Ciudadanía</option>
+                                <option value="PEP">P.E.P</option>
+                                <option value="CE">Cédula de Extranjería</option>
+                            </select>
+                            <input type="text" id="consulta_numero_documento" class="consulta-input" placeholder="Número de documento" />
+                        </div>
+                        <button type="button" id="btn-consultar" class="btn-consultar">Consultar</button>
+                    </div>
+                    <div id="consulta-resultado" class="consulta-resultado hidden"></div>
+                </div>
+
+                <!-- Separador visual -->
+                <div class="form-separator">
+                    <div class="separator-line"></div>
+                    <span class="separator-text">Completa tu información</span>
+                    <div class="separator-line"></div>
+                </div>
+
                 <label for="nombre">Nombres y Apellidos (Completos)</label>
                 <input type="text" id="nombre" name="nombre" required placeholder="Nombres y Apellidos Completos" />
 

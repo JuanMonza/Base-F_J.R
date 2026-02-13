@@ -673,26 +673,28 @@ const colombianLocations = {
                     📝 <strong>Nombre:</strong> ${nombre}<br>
                     📅 <strong>Fecha de nacimiento:</strong> ${fechaNac}<br>
                     <br>
-                    <em>Puedes continuar llenando el formulario completo abajo.</em>`;
+                    <em>Los datos se han completado automáticamente abajo ⬇️</em>`;
                     
                 mostrarResultadoConsulta(mensaje, 'success');
                 
-                // Auto-scroll al formulario después de 2 segundos
-                setTimeout(() => {
-                    showBtn?.scrollIntoView({ behavior: 'smooth' });
-                }, 2000);
+                // Auto-completar los campos del formulario principal
+                autoCompletarFormularioPrincipal(data.data, numeroDoc, tipoDoc);
                 
             } else {
                 // No se encontraron datos
                 mostrarResultadoConsulta(
                     `ℹ️ <strong>Documento no encontrado en los registros oficiales.</strong><br>
-                    Puedes continuar llenando el formulario completo para registrarte.`,
+                    Puedes continuar llenando el formulario completo manualmente.`,
                     'info'
                 );
                 
-                // Auto-scroll al formulario después de 1.5 segundos
+                // Auto-scroll al campo de nombre después de 1.5 segundos
                 setTimeout(() => {
-                    showBtn?.scrollIntoView({ behavior: 'smooth' });
+                    const nombreInput = document.getElementById('nombre');
+                    if (nombreInput) {
+                        nombreInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        nombreInput.focus();
+                    }
                 }, 1500);
             }
 
@@ -707,6 +709,48 @@ const colombianLocations = {
             btnConsultar.disabled = false;
             btnConsultar.textContent = 'Consultar';
         }
+    };
+
+    const autoCompletarFormularioPrincipal = (datos, numeroDoc, tipoDoc) => {
+        // Autocompletar campo de nombre en el formulario principal
+        if (datos.nombre) {
+            const nombreInput = document.getElementById('nombre');
+            if (nombreInput) {
+                nombreInput.value = datos.nombre;
+                nombreInput.dispatchEvent(new Event('input'));
+            }
+        }
+        
+        // Autocompletar fecha de nacimiento en el formulario principal
+        if (datos.fecha_nacimiento) {
+            const fechaInput = document.getElementById('fecha_nacimiento');
+            if (fechaInput) {
+                fechaInput.value = datos.fecha_nacimiento;
+                fechaInput.dispatchEvent(new Event('change'));
+            }
+        }
+        
+        // Autocompletar tipo y número de documento en el formulario principal
+        const tipoDocumentoSelect = document.getElementById('tipo_documento');
+        const numeroDocumentoInput = document.getElementById('numero_documento');
+        
+        if (tipoDocumentoSelect && tipoDoc) {
+            tipoDocumentoSelect.value = tipoDoc;
+            tipoDocumentoSelect.dispatchEvent(new Event('change'));
+        }
+        
+        if (numeroDocumentoInput && numeroDoc) {
+            numeroDocumentoInput.value = numeroDoc;
+            numeroDocumentoInput.dispatchEvent(new Event('input'));
+        }
+        
+        // Scroll suave hacia el formulario después de 1 segundo
+        setTimeout(() => {
+            const nombreInput = document.getElementById('nombre');
+            if (nombreInput) {
+                nombreInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }, 1000);
     };
 
     const mostrarResultadoConsulta = (mensaje, tipo) => {
