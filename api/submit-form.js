@@ -1,5 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
 
+// Configurar cliente de Supabase
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
 // Cache para rate limiting en memoria (en producción usarías Redis)
 const submissions = new Map();
 
@@ -215,18 +220,15 @@ export default async function handler(req, res) {
             direccion: sanitizeString(data.direccion),
             telefono_principal: sanitizeString(data.telefono_principal),
             telefono_familiar: sanitizeString(data.telefono_familiar),
-            tiene_correo: Boolean(data.tiene_correo),
+            tiene_correo: sanitizeString(data.tiene_correo), // TEXT en BD
             correo: sanitizeEmail(data.correo),
             estado_civil: sanitizeString(data.estado_civil),
             ocupacion: sanitizeString(data.ocupacion),
-            recibe_pension:
-                (data.recibe_pension === true || data.recibe_pension === false)
-                    ? data.recibe_pension
-                    : sanitizeString(data.recibe_pension),
+            recibe_pension: sanitizeString(data.recibe_pension), // TEXT en BD
             fondo_pension: sanitizeString(data.fondo_pension),
-            familia_extranjero: data.familia_extranjero === 'true' || data.familia_extranjero === true,
-            mascota: data.mascota === 'true' || data.mascota === true,
-            privacidad: data.privacidad === 'true' || data.privacidad === true
+            familia_extranjero: sanitizeString(data.familia_extranjero), // TEXT en BD
+            mascota: sanitizeString(data.mascota), // TEXT en BD
+            privacidad: data.privacidad === 'true' || data.privacidad === true // BOOLEAN en BD
         };
 
         // --- Insertar datos en Supabase ---
