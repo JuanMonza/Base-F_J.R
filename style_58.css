@@ -766,3 +766,157 @@ footer a:hover {
         transform: translate3d(85px, 0, 0);
     }
 }
+
+/* ===== SECCIÓN DE CONSULTA PREVIA ===== */
+.consulta-section {
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    border: 2px solid #2196f3;
+    border-radius: 15px;
+    padding: 20px;
+    margin: 20px 0 30px 0;
+    box-shadow: 0 4px 15px rgba(33, 150, 243, 0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+.consulta-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #2196f3, #4caf50, #2196f3);
+    background-size: 200% 100%;
+    animation: shimmer 3s linear infinite;
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.consulta-header h2 {
+    color: #1976d2;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 15px 0;
+    text-align: center;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.consulta-form-container {
+    display: flex;
+    gap: 12px;
+    align-items: end;
+    flex-wrap: wrap;
+}
+
+.consulta-inputs {
+    display: flex;
+    gap: 10px;
+    flex: 1;
+    min-width: 250px;
+}
+
+.consulta-input {
+    flex: 1;
+    padding: 12px 15px;
+    border: 2px solid #90caf9;
+    border-radius: 8px;
+    font-size: 14px;
+    background: white;
+    color: #1976d2;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(33, 150, 243, 0.1);
+}
+
+.consulta-input:focus {
+    outline: none;
+    border-color: #2196f3;
+    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2), 0 4px 15px rgba(33, 150, 243, 0.15);
+    transform: translateY(-1px);
+}
+
+.consulta-input::placeholder {
+    color: #90a4ae;
+}
+
+.btn-consultar {
+    background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+    white-space: nowrap;
+    min-width: 100px;
+}
+
+.btn-consultar:hover {
+    background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+}
+
+.btn-consultar:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(33, 150, 243, 0.3);
+}
+
+.btn-consultar:disabled {
+    background: #bdbdbd;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.consulta-resultado {
+    margin-top: 15px;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.consulta-resultado.success {
+    background: #e8f5e8;
+    border: 1px solid #4caf50;
+    color: #2e7d32;
+}
+
+.consulta-resultado.error {
+    background: #fde7e7;
+    border: 1px solid #f44336;
+    color: #c62828;
+}
+
+.consulta-resultado.info {
+    background: #e3f2fd;
+    border: 1px solid #2196f3;
+    color: #1976d2;
+}
+
+/* Responsive para consulta */
+@media (max-width: 480px) {
+    .consulta-form-container {
+        flex-direction: column;
+    }
+    
+    .consulta-inputs {
+        min-width: 100%;
+        flex-direction: column;
+    }
+    
+    .btn-consultar {
+        width: 100%;
+        padding: 15px;
+    }
+    
+    .consulta-header h2 {
+        font-size: 16px;
+    }
+}

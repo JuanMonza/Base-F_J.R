@@ -13,6 +13,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeModalBtn = document.getElementById("close-modal-btn");
     const modalIcon = document.querySelector(".modal-icon");
     const modalIconI = document.getElementById("modal-icon-i");
+    
+    // --- ELEMENTOS DE LA SECCIÓN DE CONSULTA ---
+    const btnConsultar = document.getElementById("btn-consultar");
+    const consultaTipoDoc = document.getElementById("consulta_tipo_documento");
+    const consultaNumeroDoc = document.getElementById("consulta_numero_documento");
+    const consultaResultado = document.getElementById("consulta-resultado");
 
     // --- LÓGICA PARA MOSTRAR EL FORMULARIO ---
     if (showBtn && form) {
@@ -612,5 +618,125 @@ const colombianLocations = {
     // Initial check for age on page load if date is pre-filled
     checkAge();
     fechaNacimientoInput.addEventListener('change', checkAge);
+
+    // ===== FUNCIONALIDAD SECCIÓN DE CONSULTA SEPARADA =====
+    
+    // Validación numérica para el campo de consulta
+    if (consultaNumeroDoc) {
+        consultaNumeroDoc.addEventListener('input', (event) => {
+            event.target.value = event.target.value.replace(/[^0-9]/g, '');
+        });
+    }
+
+    // Función principal de consulta
+    const realizarConsulta = async () => {
+        const tipoDoc = consultaTipoDoc?.value;
+        const numeroDoc = consultaNumeroDoc?.value;
+
+        // Validaciones básicas
+        if (!tipoDoc || !numeroDoc) {
+            mostrarResultadoConsulta('⚠️ Por favor selecciona el tipo de documento e ingresa el número', 'error');
+            return;
+        }
+
+        if (numeroDoc.length < 6) {
+            mostrarResultadoConsulta('⚠️ El número de documento debe tener al menos 6 dígitos', 'error');
+            return;
+        }
+
+        try {
+            // Deshabilitar botón durante la consulta
+            btnConsultar.disabled = true;
+            btnConsultar.textContent = '🔍 Consultando...';
+            
+            mostrarResultadoConsulta('🔍 Buscando información en registros oficiales...', 'info');
+
+            const response = await fetch('/api/consultar-datos', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    numero_documento: numeroDoc,
+                    tipo_documento: tipoDoc
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                // Datos encontrados
+                const nombre = data.data.nombre || 'No disponible';
+                const fechaNac = data.data.fecha_nacimiento || 'No disponible';
+                
+                const mensaje = `✅ <strong>Información encontrada:</strong><br>
+                    📝 <strong>Nombre:</strong> ${nombre}<br>
+                    📅 <strong>Fecha de nacimiento:</strong> ${fechaNac}<br>
+                    <br>
+                    <em>Puedes continuar llenando el formulario completo abajo.</em>`;
+                    
+                mostrarResultadoConsulta(mensaje, 'success');
+                
+                // Auto-scroll al formulario después de 2 segundos
+                setTimeout(() => {
+                    showBtn?.scrollIntoView({ behavior: 'smooth' });
+                }, 2000);
+                
+            } else {
+                // No se encontraron datos
+                mostrarResultadoConsulta(
+                    `ℹ️ <strong>Documento no encontrado en los registros oficiales.</strong><br>
+                    Puedes continuar llenando el formulario completo para registrarte.`,
+                    'info'
+                );
+                
+                // Auto-scroll al formulario después de 1.5 segundos
+                setTimeout(() => {
+                    showBtn?.scrollIntoView({ behavior: 'smooth' });
+                }, 1500);
+            }
+
+        } catch (error) {
+            console.error('Error en consulta:', error);
+            mostrarResultadoConsulta(
+                '❌ <strong>Error al consultar la información.</strong><br>Por favor intenta nuevamente o continúa con el registro manual.',
+                'error'
+            );
+        } finally {
+            // Restaurar botón
+            btnConsultar.disabled = false;
+            btnConsultar.textContent = 'Consultar';
+        }
+    };
+
+    const mostrarResultadoConsulta = (mensaje, tipo) => {
+        if (consultaResultado) {
+            consultaResultado.innerHTML = mensaje;
+            consultaResultado.className = `consulta-resultado ${tipo}`;
+            consultaResultado.classList.remove('hidden');
+            
+            // Auto-ocultar mensajes de error después de 8 segundos
+            if (tipo === 'error') {
+                setTimeout(() => {
+                    consultaResultado.classList.add('hidden');
+                }, 8000);
+            }
+        }
+    };
+
+    // Event listener para el botón de consulta
+    if (btnConsultar) {
+        btnConsultar.addEventListener('click', realizarConsulta);
+    }
+
+    // Event listener para Enter en el campo de número
+    if (consultaNumeroDoc) {
+        consultaNumeroDoc.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                realizarConsulta();
+            }
+        });
+    }
 
 });
