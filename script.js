@@ -665,15 +665,23 @@ const colombianLocations = {
             const data = await response.json();
 
             if (response.ok && data.success) {
-                // Datos encontrados
+                // Datos encontrados - Mostrar información más detallada
                 const nombre = data.data.nombre || 'No disponible';
+                const nombres = data.data.nombres || '';
+                const apellidos = data.data.apellidos || '';
                 const fechaNac = data.data.fecha_nacimiento || 'No disponible';
+                const verificadoEn = data.data.verificado_en || '';
+                const verificadoPor = data.data.certificado_por || 'Verifik.co';
                 
-                const mensaje = `✅ <strong>Información encontrada:</strong><br>
-                    📝 <strong>Nombre:</strong> ${nombre}<br>
-                    📅 <strong>Fecha de nacimiento:</strong> ${fechaNac}<br>
+                const mensaje = `✅ <strong>Información encontrada en registros oficiales:</strong><br>
+                    👤 <strong>Nombre completo:</strong> ${nombre}<br>
+                    ${nombres ? `📝 <strong>Nombres:</strong> ${nombres}<br>` : ''}
+                    ${apellidos ? `📝 <strong>Apellidos:</strong> ${apellidos}<br>` : ''}
+                    ${fechaNac !== 'No disponible' ? `📅 <strong>Fecha de nacimiento:</strong> ${fechaNac}<br>` : ''}
+                    ${verificadoEn ? `🕒 <strong>Verificado:</strong> ${verificadoEn}<br>` : ''}
+                    🏛️ <strong>Fuente:</strong> ${verificadoPor}<br>
                     <br>
-                    <em>Los datos se han completado automáticamente abajo ⬇️</em>`;
+                    <em>✨ Los datos se han completado automáticamente abajo ⬇️</em>`;
                     
                 mostrarResultadoConsulta(mensaje, 'success');
                 

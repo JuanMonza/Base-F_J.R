@@ -45,16 +45,16 @@ export default async function consultarDatos(req, res) {
 
         console.log(`🔍 Consultando: ${tipo_documento} ${numero_documento}`);
 
-        // Llamada a la API de Verifik
-        const verifik_response = await fetch('https://api.verifik.co/v2/co/identity', {
+        // Llamada a la API de Verifik - Endpoint específico para Colombia
+        const verifik_response = await fetch('https://api.verifik.co/v2/co/cedula', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${verifik_token}`
             },
             body: JSON.stringify({
-                document_type: tipo_documento === 'CC' ? 'CC' : tipo_documento,
-                document_number: numero_documento
+                DocumentType: tipo_documento, // Estructura exacta de Verifik
+                DocumentNumber: numero_documento
             })
         });
 
@@ -64,24 +64,42 @@ export default async function consultarDatos(req, res) {
             console.error('❌ Error Verifik:', verifik_data);
             return res.status(400).json({ 
                 error: 'No se pudo consultar la información',
-                details: verifik_data.message || 'Error desconocido'
+                details: verifik_data.message || 'Documento no encontrado en registros oficiales'
             });
         }
 
-        // Extraer datos útiles de la respuesta de Verifik
+        console.log('✅ Respuesta Verifik exitosa:', verifik_data);
+
+        // Extraer datos según la estructura real de Verifik Colombia
+        if (!verifik_data.data) {
+            return res.status(404).json({ 
+                error: 'Documento no encontrado',
+                details: 'No hay información disponible para este documento'
+            });
+        }
+
         const extracted_data = {
-            nombre: verifik_data.data?.full_name || '',
-            fecha_nacimiento: verifik_data.data?.birth_date || '',
-            // Agregar más campos según lo que devuelva Verifik
-            status: verifik_data.status || 'success'
+            nombre: verifik_data.data.fullName || '',
+            nombres: verifik_data.data.firstName || '',
+            apellidos: verifik_data.data.lastName || '',
+            numero_documento: verifik_data.data.documentNumber || numero_documento,
+            tipo_documento: verifik_data.data.documentType || tipo_documento,
+            // La fecha de nacimiento no está en la respuesta de ejemplo, pero la dejamos por si acaso
+            fecha_nacimiento: verifik_data.data.birthDate || verifik_data.data.birth_date || '',
+            // Información adicional del API
+            array_nombres: verifik_data.data.arrayName || [],
+            verifik_id: verifik_data.id || '',
+            verificado_en: verifik_data.signature?.dateTime || '',
+            certificado_por: verifik_data.signature?.message || 'Verifik.co'
         };
 
-        console.log('✅ Datos obtenidos de Verifik para:', numero_documento);
+        console.log('✅ Datos procesados para:', numero_documento);
         
         return res.status(200).json({
             success: true,
             data: extracted_data,
-            message: 'Datos encontrados correctamente'
+            message: 'Datos encontrados correctamente',
+            source: 'Verifik.co - Registros Oficiales Colombia'
         });
 
     } catch (error) {
