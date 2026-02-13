@@ -6,12 +6,12 @@ const submissions = new Map();
 // Configuración de seguridad
 const SECURITY_CONFIG = {
     MAX_SUBMISSIONS_PER_IP: 500,       // Máximo 500 envíos por IP por hora
-    MAX_SUBMISSIONS_PER_DOC: 1,      // Máximo 1 envío por documento por día
+    MAX_SUBMISSIONS_PER_DOC: 5,      // Máximo 5 envíos por documento por día (TEMPORAL PARA TESTING)
     TIME_WINDOW: 60 * 60 * 1000,     // 1 hora en milisegundos
     DOC_TIME_WINDOW: 24 * 60 * 60 * 1000, // 24 horas
     MAX_PAYLOAD_SIZE: 10240,          // 10KB máximo
     HONEYPOT_FIELD: 'website',        // Campo trampa para bots
-    MIN_FORM_TIME: 10000,             // Mínimo 10 segundos para llenar el form
+    MIN_FORM_TIME: 3000,             // Mínimo 3 segundos para llenar el form (TEMPORAL PARA TESTING)
     MAX_FORM_TIME: 30 * 60 * 1000     // Máximo 30 minutos
 };
 
@@ -146,9 +146,9 @@ export default async function handler(req, res) {
     const recentSubmissions = ipSubmissions.filter(time => now - time < SECURITY_CONFIG.TIME_WINDOW);
     
     if (recentSubmissions.length >= SECURITY_CONFIG.MAX_SUBMISSIONS_PER_IP) {
-        console.log(`🚫 Rate limit excedido para IP: ${clientIP}`);
+        console.log(`🚫 Rate limit IP excedido: ${clientIP} (${recentSubmissions.length}/${SECURITY_CONFIG.MAX_SUBMISSIONS_PER_IP} en ${SECURITY_CONFIG.TIME_WINDOW/1000/60} min)`);
         return res.status(429).json({ 
-            message: "Demasiadas solicitudes. Intenta de nuevo más tarde.",
+            message: "Demasiadas solicitudes desde tu IP. Intenta de nuevo más tarde.",
             retryAfter: Math.ceil(SECURITY_CONFIG.TIME_WINDOW / 1000 / 60) + " minutos"
         });
     }
@@ -191,22 +191,23 @@ export default async function handler(req, res) {
             return res.status(400).json({ message: "Formato de documento inválido" });
         }
 
-        // PROTECCIÓN 5: Rate limiting por documento (solo 1 por día por documento)
+        // PROTECCIÓN 5: Rate limiting por documento (configurable para testing)
         if (data.numero_documento) {
             const docKey = `doc_${data.numero_documento}`;
             const docSubmissions = submissions.get(docKey) || [];
-            const recentDocSubmissions = docSubmissions.filter(time => now - time < 24 * 60 * 60 * 1000); // 24 horas
+            const recentDocSubmissions = docSubmissions.filter(time => now - time < SECURITY_CONFIG.DOC_TIME_WINDOW);
             
-            if (recentDocSubmissions.length >= 1) {
-                console.log(`🚫 Documento ya registrado hoy: ${data.numero_documento} desde ${clientIP}`);
+            if (recentDocSubmissions.length >= SECURITY_CONFIG.MAX_SUBMISSIONS_PER_DOC) {
+                console.log(`🚫 Límite de documento excedido: ${data.numero_documento} (${recentDocSubmissions.length}/${SECURITY_CONFIG.MAX_SUBMISSIONS_PER_DOC}) desde ${clientIP}`);
                 return res.status(429).json({ 
-                    message: "Este documento ya fue registrado hoy. Intenta mañana.",
+                    message: `Este documento ya alcanzó el límite de registros (${SECURITY_CONFIG.MAX_SUBMISSIONS_PER_DOC} por día). Intenta mañana.`,
                     retryAfter: "24 horas"
                 });
             }
             
             recentDocSubmissions.push(now);
             submissions.set(docKey, recentDocSubmissions);
+            console.log(`✅ Documento registrado: ${data.numero_documento} (${recentDocSubmissions.length}/${SECURITY_CONFIG.MAX_SUBMISSIONS_PER_DOC})`);
         }
 
         // PROTECCIÓN 6: Sanitizar todos los datos antes de insertar
