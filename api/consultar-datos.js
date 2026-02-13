@@ -37,13 +37,13 @@ export default async function consultarDatos(req, res) {
         // Validar token de Verifik
         const verifik_token = process.env.VERIFIK_TOKEN;
         if (!verifik_token) {
-            console.error('❌ Token de Verifik no configurado');
+            console.error('Token de Verifik no configurado');
             return res.status(500).json({ 
                 error: 'Servicio de consulta no disponible' 
             });
         }
 
-        console.log(`🔍 Consultando: ${tipo_documento} ${numero_documento}`);
+        console.log(`Consultando: ${tipo_documento} ${numero_documento}`);
 
         // Llamada a la API de Verifik - Endpoint específico para Colombia
         const verifik_response = await fetch('https://api.verifik.co/v2/co/cedula', {
@@ -61,14 +61,14 @@ export default async function consultarDatos(req, res) {
         const verifik_data = await verifik_response.json();
 
         if (!verifik_response.ok) {
-            console.error('❌ Error Verifik:', verifik_data);
+            console.error('Error Verifik:', verifik_data);
             return res.status(400).json({ 
                 error: 'No se pudo consultar la información',
                 details: verifik_data.message || 'Documento no encontrado en registros oficiales'
             });
         }
 
-        console.log('✅ Respuesta Verifik exitosa:', verifik_data);
+        console.log('Respuesta Verifik exitosa:', verifik_data);
 
         // Extraer datos según la estructura real de Verifik Colombia
         if (!verifik_data.data) {
@@ -93,7 +93,7 @@ export default async function consultarDatos(req, res) {
             certificado_por: verifik_data.signature?.message || 'Verifik.co'
         };
 
-        console.log('✅ Datos procesados para:', numero_documento);
+        console.log('Datos procesados para:', numero_documento);
         
         return res.status(200).json({
             success: true,
@@ -103,7 +103,7 @@ export default async function consultarDatos(req, res) {
         });
 
     } catch (error) {
-        console.error('❌ Error en consulta Verifik:', error.message);
+        console.error('Error en consulta Verifik:', error.message);
         return res.status(500).json({ 
             error: 'Error interno del servidor al consultar datos',
             details: error.message 
