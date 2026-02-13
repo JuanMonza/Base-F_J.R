@@ -16,7 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // --- ELEMENTOS DE LA SECCIÓN DE CONSULTA ---
     const btnConsultar = document.getElementById("btn-consultar");
-    const consultaTipoDoc = document.getElementById("consulta_tipo_documento");
+    // const consultaTipoDoc = document.getElementById("consulta_tipo_documento"); // Campo comentado - siempre se usa "CC"
+    const consultaTipoDoc = null; // Siempre será null, se usa "CC" por defecto
     const consultaNumeroDoc = document.getElementById("consulta_numero_documento");
     const consultaResultado = document.getElementById("consulta-resultado");
 
@@ -630,12 +631,13 @@ const colombianLocations = {
 
     // Función principal de consulta
     const realizarConsulta = async () => {
-        const tipoDoc = consultaTipoDoc?.value;
+        // Usar "CC" por defecto si no hay selección de tipo (campo comentado en HTML)
+        const tipoDoc = consultaTipoDoc?.value || "CC";
         const numeroDoc = consultaNumeroDoc?.value;
 
         // Validaciones básicas
-        if (!tipoDoc || !numeroDoc) {
-            mostrarResultadoConsulta('⚠️ Por favor selecciona el tipo de documento e ingresa el número', 'error');
+        if (!numeroDoc) {
+            mostrarResultadoConsulta('⚠️ Por favor ingresa el número de documento', 'error');
             return;
         }
 
