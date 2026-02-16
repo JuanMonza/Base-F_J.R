@@ -184,10 +184,10 @@ const colombianLocations = {
                 clearTimeout(consultaTimeout);
             }
             
-            // Esperar 800ms después de que el usuario termine de escribir
+            // Esperar 2 segundos después de que el usuario termine de escribir
             consultaTimeout = setTimeout(async () => {
                 await consultarDatosAutomaticamente(numeroDoc, tipoDoc);
-            }, 800);
+            }, 2000);
         }
     };
 
@@ -209,21 +209,38 @@ const colombianLocations = {
                 })
             });
 
-            const data = await response.json();
+            // Manejar respuestas no-JSON
+            let data;
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                throw new Error('Respuesta inválida del servidor');
+            }
+
+            // Manejar error 429
+            if (response.status === 429) {
+                console.log('⏱️ Límite de consultas alcanzado');
+                mostrarMensajeConsulta('⏱️ Límite alcanzado. Completa manualmente.', 'warning');
+                return;
+            }
             
             if (response.ok && data.success) {
                 console.log('✅ Datos encontrados:', data.data);
                 autocompletarFormulario(data.data);
-                mostrarMensajeConsulta('✅ Datos encontrados y cargados automáticamente', 'success');
+                const mensaje = data.fromCache ? 
+                    '✅ Datos cargados (caché)' : 
+                    '✅ Datos encontrados y cargados';
+                mostrarMensajeConsulta(mensaje, 'success');
                 lastConsultedDocument = numeroDoc;
             } else {
                 console.log('ℹ️ No se encontraron datos para el documento');
-                mostrarMensajeConsulta('ℹ️ Documento no encontrado en registros oficiales', 'info');
+                mostrarMensajeConsulta('ℹ️ Documento no encontrado', 'info');
             }
             
         } catch (error) {
             console.error('❌ Error en consulta automática:', error);
-            mostrarMensajeConsulta('⚠️ Error al consultar datos', 'warning');
+            // No mostrar error si es automático, solo log silencioso
         } finally {
             mostrarIndicadorConsulta(false);
         }
@@ -664,7 +681,27 @@ const colombianLocations = {
                 })
             });
 
-            const data = await response.json();
+            // Manejar respuestas no-JSON (como HTML de error)
+            let data;
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                // Si no es JSON, probablemente es un error del servidor
+                throw new Error('El servidor devolvió una respuesta inválida');
+            }
+
+            // Manejar error 429 específicamente
+            if (response.status === 429) {
+                const retryAfter = data.retryAfter || 60;
+                mostrarResultadoConsulta(
+                    `⏱️ <strong>Límite de consultas alcanzado</strong><br>
+                    ${data.details || 'Por favor espera un momento e intenta nuevamente.'}<br>
+                    <em>Puedes continuar llenando el formulario manualmente.</em>`,
+                    'warning'
+                );
+                return;
+            }
 
             if (response.ok && data.success) {
                 // Datos encontrados - Mostrar información más detallada
