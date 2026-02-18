@@ -26,19 +26,14 @@
             <!-- Formulario (oculto al inicio) -->
             <form id="form" class="hidden">
                 
-                <!-- SECCIÓN DE CONSULTA PREVIA (DENTRO DEL FORMULARIO) -->
+                <!-- SECCIÓN DE CONSULTA PREVIA CON VERIFIK (COMENTADA TEMPORALMENTE) -->
+                <!--
                 <div class="consulta-section">
                     <div class="consulta-header">
                         <h2>¿Ya estás registrado? Consulta tu información</h2>
                     </div>
                     <div class="consulta-form-container">
                         <div class="consulta-inputs">
-                            <!-- <select id="consulta_tipo_documento" class="consulta-input" required>
-                                <option value="">Tipo de Documento</option>
-                                <option value="CC">Cédula de Ciudadanía</option>
-                                <option value="PEP">P.E.P</option>
-                                <option value="CE">Cédula de Extranjería</option>
-                            </select> -->
                             <input type="text" id="consulta_numero_documento" class="consulta-input" placeholder="Número de documento" />
                         </div>
                         <button type="button" id="btn-consultar" class="btn-consultar">Consultar</button>
@@ -46,12 +41,12 @@
                     <div id="consulta-resultado" class="consulta-resultado hidden"></div>
                 </div>
 
-                <!-- Separador visual -->
                 <div class="form-separator">
                     <div class="separator-line"></div>
                     <span class="separator-text">Completa tu información</span>
                     <div class="separator-line"></div>
                 </div>
+                -->
 
                 <label for="nombre">Nombres y Apellidos (Completos)</label>
                 <input type="text" id="nombre" name="nombre" required placeholder="Nombres y Apellidos Completos" />
@@ -63,8 +58,15 @@
                     <option value="PEP">P.E.P</option>
                     <option value="CE">Cédula de Extranjería</option>
                 </select>
+                
                 <label for="numero_documento">Número de Documento</label>
-                <input type="text" name="numero_documento" id="numero_documento" required />
+                <input type="text" name="numero_documento" id="numero_documento" required placeholder="Ingrese su número de documento" />
+                
+                <button type="button" id="btn-consultar-documento" class="btn-consultar-doc">
+                    <i class="fas fa-search"></i> Consultar en Base de Datos
+                </button>
+                
+                <div id="resultado-consulta-doc" class="notificacion-documento-existente" style="margin-top: 10px;"></div>
 
                 <label for="fecha_nacimiento">Fecha de nacimiento</label>
                 <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" required />
@@ -227,12 +229,7 @@
         </div>
     </footer>
 
-    <!-- Scripts de librerías externas -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
-    <script src="https://npmcdn.com/flatpickr/dist/l10n/es.js"></script>
-    <!-- Nuestro script personalizado -->
-    <script src="script.js" defer></script>
-
+    <!-- Modal de éxito (debe estar antes de los scripts) -->
     <div id="success-modal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-icon">
@@ -242,6 +239,13 @@
             <button id="close-modal-btn">Cerrar</button>
         </div>
     </div>
+
+    <!-- Scripts de librerías externas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/es.js"></script>
+    <!-- Nuestro script personalizado -->
+    <script src="script.js" defer></script>
+
 </body>
 
 </html>

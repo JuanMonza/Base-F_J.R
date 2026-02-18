@@ -13,13 +13,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeModalBtn = document.getElementById("close-modal-btn");
     const modalIcon = document.querySelector(".modal-icon");
     const modalIconI = document.getElementById("modal-icon-i");
+
+    // Depuración: verificar elementos críticos
+    console.log('showBtn encontrado:', !!showBtn);
+    console.log('form encontrado:', !!form);
+    console.log('giveawayPopup encontrado:', !!giveawayPopup);
+    console.log('closePopupBtn encontrado:', !!closePopupBtn);
     
-    // --- ELEMENTOS DE LA SECCIÓN DE CONSULTA ---
-    const btnConsultar = document.getElementById("btn-consultar");
-    // const consultaTipoDoc = document.getElementById("consulta_tipo_documento"); // Campo comentado - siempre se usa "CC"
-    const consultaTipoDoc = null; // Siempre será null, se usa "CC" por defecto
-    const consultaNumeroDoc = document.getElementById("consulta_numero_documento");
-    const consultaResultado = document.getElementById("consulta-resultado");
+    // --- ELEMENTOS DE LA SECCIÓN DE CONSULTA VERIFIK (COMENTADO TEMPORALMENTE) ---
+    // const btnConsultar = document.getElementById("btn-consultar");
+    // const consultaTipoDoc = null;
+    // const consultaNumeroDoc = document.getElementById("consulta_numero_documento");
+    // const consultaResultado = document.getElementById("consulta-resultado");
+
+    // --- NUEVO: BOTÓN CONSULTAR DOCUMENTO ---
+    const btnConsultarDocumento = document.getElementById("btn-consultar-documento");
+    const resultadoConsultaDoc = document.getElementById("resultado-consulta-doc");
+    const tipoDocumentoSelect = document.getElementById('tipo_documento');
+    const numeroDocumentoInput = document.getElementById('numero_documento');
+    const nombreInput = document.getElementById('nombre');
+    const fechaNacimientoInput = document.getElementById('fecha_nacimiento');
 
     // --- LÓGICA PARA MOSTRAR EL FORMULARIO ---
     if (showBtn && form) {
@@ -134,10 +147,6 @@ const colombianLocations = {
     }
     );
 
-    // --- LÓGICA DE VALIDACIÓN DE DOCUMENTO ---
-    const tipoDocumentoSelect = document.getElementById('tipo_documento');
-    const numeroDocumentoInput = document.getElementById('numero_documento');
-
     // --- LÓGICA DE VALIDACIÓN DE NÚMEROS DE TELÉFONO ---
     const telefonoPrincipalInput = document.getElementById('telefono_principal');
     const telefonoFamiliarInput = document.getElementById('telefono_familiar');
@@ -166,45 +175,166 @@ const colombianLocations = {
         event.target.value = event.target.value.replace(/[^0-9]/g, '');
     };
 
-    // ===== CONSULTA AUTOMÁTICA CON VERIFIK Y VERIFICACIÓN EN BD =====
+    // ===== NUEVO: BOTÓN CONSULTAR DOCUMENTO =====
+    if (btnConsultarDocumento) {
+        btnConsultarDocumento.addEventListener('click', async () => {
+            const numeroDoc = numeroDocumentoInput.value.trim();
+            const tipoDoc = tipoDocumentoSelect.value;
+
+            // Validaciones
+            if (!tipoDoc) {
+                mostrarResultadoConsulta('⚠️ Por favor selecciona el tipo de documento', 'warning');
+                return;
+            }
+
+            if (!numeroDoc || numeroDoc.length < 5) {
+                mostrarResultadoConsulta('⚠️ Por favor ingresa un número de documento válido', 'warning');
+                return;
+            }
+
+            // Deshabilitar botón y mostrar loading
+            btnConsultarDocumento.disabled = true;
+            btnConsultarDocumento.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Consultando...';
+
+            try {
+                console.log(`🔍 Consultando documento: ${tipoDoc} ${numeroDoc}`);
+                
+                const response = await fetch('/api/verificar-documento', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        numero_documento: numeroDoc
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al consultar el documento');
+                }
+
+                const data = await response.json();
+                console.log('📊 Resultado de consulta:', data);
+
+                if (data.exists && data.data) {
+                    // ✅ DOCUMENTO EXISTE - Autocompletar y bloquear campos
+                    console.log(`✅ Documento encontrado: ${data.data.nombre}`);
+                    mostrarResultadoConsulta(
+                        `✅ Datos encontrados para: ${data.data.nombre}<br><small>Los campos bloqueados no se pueden modificar.</small>`,
+                        'success'
+                    );
+                    
+                    // Autocompletar formulario
+                    autocompletarFormularioCompleto(data.data);
+                    
+                    // Bloquear campos que no se pueden modificar
+                    bloquearCamposProtegidos(true);
+                    
+                } else {
+                    // ℹ️ DOCUMENTO NO EXISTE - Permitir llenar todo
+                    console.log(`ℹ️ Documento ${numeroDoc} no encontrado - formulario nuevo`);
+                    mostrarResultadoConsulta(
+                        'ℹ️ Documento no encontrado. Puedes llenar el formulario para registrarte.',
+                        'info'
+                    );
+                    
+                    // Limpiar formulario (excepto tipo y número de documento)
+                    limpiarFormularioParcial();
+                    
+                    // Desbloquear todos los campos
+                    bloquearCamposProtegidos(false);
+                }
+
+            } catch (error) {
+                console.error('❌ Error al consultar documento:', error);
+                mostrarResultadoConsulta(
+                    '❌ Error al consultar el documento. Intenta nuevamente.',
+                    'error'
+                );
+            } finally {
+                // Restaurar botón
+                btnConsultarDocumento.disabled = false;
+                btnConsultarDocumento.innerHTML = '<i class="fas fa-search"></i> Consultar';
+            }
+        });
+    }
+
+    // Función para bloquear campos protegidos (nombre, documento, fecha nacimiento)
+    const bloquearCamposProtegidos = (bloquear) => {
+        const camposProtegidos = [
+            nombreInput,
+            tipoDocumentoSelect,
+            numeroDocumentoInput,
+            fechaNacimientoInput
+        ];
+
+        camposProtegidos.forEach(campo => {
+            if (campo) {
+                campo.disabled = bloquear;
+                if (bloquear) {
+                    campo.style.backgroundColor = '#f5f5f5';
+                    campo.style.cursor = 'not-allowed';
+                } else {
+                    campo.style.backgroundColor = '';
+                    campo.style.cursor = '';
+                }
+            }
+        });
+
+        console.log(`🔒 Campos protegidos ${bloquear ? 'BLOQUEADOS' : 'DESBLOQUEADOS'}`);
+    };
+
+    // Función para mostrar resultado de la consulta
+    const mostrarResultadoConsulta = (mensaje, tipo) => {
+        if (!resultadoConsultaDoc) return;
+
+        const colores = {
+            success: { bg: '#d4edda', border: '#28a745', text: '#155724' },
+            warning: { bg: '#fff3cd', border: '#ffc107', text: '#856404' },
+            error: { bg: '#f8d7da', border: '#dc3545', text: '#721c24' },
+            info: { bg: '#d1ecf1', border: '#17a2b8', text: '#0c5460' }
+        };
+
+        const color = colores[tipo] || colores.info;
+
+        resultadoConsultaDoc.innerHTML = `
+            <div style="background: ${color.bg}; border: 2px solid ${color.border}; border-radius: 8px; padding: 12px; color: ${color.text}; font-size: 14px; animation: slideDown 0.3s ease-out;">
+                ${mensaje}
+            </div>
+        `;
+
+        resultadoConsultaDoc.style.display = 'block';
+    };
+
+    // Función para limpiar formulario parcialmente (mantener tipo y número de documento)
+    const limpiarFormularioParcial = () => {
+        const camposAMantener = ['numero_documento', 'tipo_documento'];
+        
+        const inputs = form.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            if (!camposAMantener.includes(input.id) && input.id !== 'btn-consultar-documento') {
+                if (input.type === 'checkbox') {
+                    input.checked = false;
+                } else if (input.type !== 'button' && input.tagName !== 'BUTTON') {
+                    input.value = '';
+                }
+            }
+        });
+        
+        console.log('🧹 Formulario limpiado parcialmente');
+    };
+
+    // ===== CONSULTA AUTOMÁTICA CON VERIFIK Y VERIFICACIÓN EN BD (DESACTIVADA) =====
     let consultaTimeout = null;
     let verificacionTimeout = null;
     let lastConsultedDocument = '';
     let lastVerifiedDocument = '';
 
     const handleDocumentInput = async (event) => {
-        // Primero aplicar validación numérica
+        // Solo aplicar validación numérica, SIN consulta automática
         forceNumericInput(event);
         
-        const numeroDoc = event.target.value;
-        const tipoDoc = tipoDocumentoSelect.value;
-        
-        // Si el documento es muy corto o vacío, limpiar notificación
-        if (numeroDoc.length < 6) {
-            ocultarNotificacionDocumentoExistente();
-            lastVerifiedDocument = '';
-        }
-        
-        // Solo consultar si el documento es válido y diferente al anterior
-        if (numeroDoc.length >= 6 && numeroDoc !== lastConsultedDocument && tipoDoc) {
-            // Cancelar consultas anteriores si existen
-            if (consultaTimeout) {
-                clearTimeout(consultaTimeout);
-            }
-            if (verificacionTimeout) {
-                clearTimeout(verificacionTimeout);
-            }
-            
-            // Esperar 2 segundos después de que el usuario termine de escribir
-            consultaTimeout = setTimeout(async () => {
-                await consultarDatosAutomaticamente(numeroDoc, tipoDoc);
-            }, 2000);
-
-            // Verificar si el documento ya existe en nuestra base de datos
-            verificacionTimeout = setTimeout(async () => {
-                await verificarDocumentoEnBD(numeroDoc);
-            }, 1500);
-        }
+        // La consulta ahora se hace SOLO con el botón "Consultar"
     };
 
     const verificarDocumentoEnBD = async (numeroDoc) => {
@@ -238,11 +368,14 @@ const colombianLocations = {
             
             if (data.exists) {
                 console.log(`✅ ¡DOCUMENTO ENCONTRADO EN BD! Nombre: ${data.data?.nombre || 'N/A'}`);
+                console.log('📋 Cargando todos los datos del formulario...');
                 mostrarNotificacionDocumentoExistente(data.data);
+                autocompletarFormularioCompleto(data.data); // Llenar TODOS los campos
                 lastVerifiedDocument = numeroDoc;
             } else {
                 console.log(`ℹ️ Documento ${numeroDoc} NO existe en BD (registro nuevo)`);
                 ocultarNotificacionDocumentoExistente();
+                limpiarFormulario(); // Limpiar el formulario si no existe
                 lastVerifiedDocument = '';
             }
             
@@ -259,20 +392,19 @@ const colombianLocations = {
         notificacion.id = 'notificacion-documento-existente';
         notificacion.className = 'notificacion-documento-existente';
         notificacion.innerHTML = `
-            <div style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 8px; padding: 15px; margin: 15px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <div style="background: #d4edda; border: 2px solid #28a745; border-radius: 8px; padding: 15px; margin: 15px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                    <i class="fas fa-info-circle" style="color: #ff9800; font-size: 24px;"></i>
-                    <h3 style="margin: 0; color: #856404; font-size: 16px;">Información Importante</h3>
+                    <i class="fas fa-check-circle" style="color: #28a745; font-size: 24px;"></i>
+                    <h3 style="margin: 0; color: #155724; font-size: 16px;">¡Datos Encontrados!</h3>
                 </div>
-                <p style="margin: 8px 0; color: #856404; font-size: 14px;">
-                    <strong>✅ Tus datos ya están registrados en nuestro sistema.</strong>
+                <p style="margin: 8px 0; color: #155724; font-size: 14px;">
+                    <strong>✅ Hemos encontrado tus datos y los hemos cargado automáticamente.</strong>
                 </p>
-                <p style="margin: 8px 0; color: #856404; font-size: 13px;">
-                    ${datos.nombre ? `Registrado a nombre de: <strong>${datos.nombre}</strong>` : ''}
+                <p style="margin: 8px 0; color: #155724; font-size: 13px;">
+                    ${datos?.nombre ? `📝 Nombre: <strong>${datos.nombre}</strong>` : ''}
                 </p>
-                <p style="margin: 8px 0; color: #856404; font-size: 13px;">
-                    Si deseas actualizar tu información, continúa llenando el formulario y haz clic en "Enviar". 
-                    Tus datos se actualizarán automáticamente.
+                <p style="margin: 8px 0; color: #155724; font-size: 13px;">
+                    Puedes revisar y actualizar cualquier campo que desees, luego haz clic en "Enviar" para guardar los cambios.
                 </p>
             </div>
         `;
@@ -289,6 +421,143 @@ const colombianLocations = {
         }
     };
 
+    // Función para autocompletar TODOS los campos del formulario
+    const autocompletarFormularioCompleto = (datos) => {
+        if (!datos) return;
+
+        console.log('📝 Autocompletando formulario con datos:', datos);
+
+        // Campos de texto simples
+        const camposTexto = {
+            'nombre': datos.nombre,
+            'tipo_documento': datos.tipo_documento,
+            'numero_documento': datos.numero_documento,
+            'fecha_nacimiento': datos.fecha_nacimiento,
+            'departamento': datos.departamento,
+            'direccion': datos.direccion,
+            'telefono_principal': datos.telefono_principal,
+            'telefono_familiar': datos.telefono_familiar,
+            'estado_civil': datos.estado_civil,
+            'ocupacion': datos.ocupacion,
+            'fondo_pension': datos.fondo_pension
+        };
+
+        // Llenar campos de texto y selects
+        for (const [campo, valor] of Object.entries(camposTexto)) {
+            if (valor !== null && valor !== undefined) {
+                const elemento = document.getElementById(campo);
+                if (elemento) {
+                    elemento.value = valor;
+                    // Trigger eventos para validaciones
+                    elemento.dispatchEvent(new Event('input', { bubbles: true }));
+                    elemento.dispatchEvent(new Event('change', { bubbles: true }));
+                    console.log(`✓ Campo ${campo}: ${valor}`);
+                }
+            }
+        }
+
+        // Manejar departamento y ciudad (en orden)
+        if (datos.departamento) {
+            const deptSelect = document.getElementById('departamento');
+            if (deptSelect) {
+                deptSelect.value = datos.departamento;
+                deptSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                
+                // Esperar a que se carguen las ciudades y luego seleccionar
+                setTimeout(() => {
+                    if (datos.ciudad) {
+                        const ciudadSelect = document.getElementById('ciudad');
+                        if (ciudadSelect) {
+                            ciudadSelect.value = datos.ciudad;
+                            ciudadSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                            console.log(`✓ Ciudad: ${datos.ciudad}`);
+                        }
+                    }
+                }, 100);
+            }
+        }
+
+        // Campos booleanos/select
+        if (datos.tiene_correo !== null && datos.tiene_correo !== undefined) {
+            const tieneCorreoSelect = document.getElementById('tiene_correo');
+            if (tieneCorreoSelect) {
+                tieneCorreoSelect.value = datos.tiene_correo;
+                tieneCorreoSelect.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }
+
+        // Si tiene correo, llenar el campo de correo
+        if (datos.correo) {
+            // Primero asegurar que el contenedor esté visible
+            setTimeout(() => {
+                const correoInput = document.getElementById('correo');
+                if (correoInput) {
+                    correoInput.value = datos.correo;
+                    correoInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    console.log(`✓ Correo: ${datos.correo}`);
+                }
+            }, 100);
+        }
+
+        // Recibe pensión
+        if (datos.recibe_pension !== null && datos.recibe_pension !== undefined) {
+            const recibePensionSelect = document.getElementById('recibe_pension');
+            if (recibePensionSelect) {
+                recibePensionSelect.value = datos.recibe_pension;
+                recibePensionSelect.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }
+
+        // Familia en el extranjero
+        if (datos.familia_extranjero !== null && datos.familia_extranjero !== undefined) {
+            const familiaSelect = document.getElementById('familia_extranjero');
+            if (familiaSelect) {
+                familiaSelect.value = datos.familia_extranjero;
+                familiaSelect.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }
+
+        // Mascota
+        if (datos.mascota !== null && datos.mascota !== undefined) {
+            const mascotaSelect = document.getElementById('mascota');
+            if (mascotaSelect) {
+                mascotaSelect.value = datos.mascota;
+                mascotaSelect.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }
+
+        // Checkbox de privacidad
+        if (datos.privacidad !== null && datos.privacidad !== undefined) {
+            const privacidadCheck = document.getElementById('privacidad');
+            if (privacidadCheck) {
+                privacidadCheck.checked = datos.privacidad;
+                privacidadCheck.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }
+
+        console.log('✅ Formulario autocompletado exitosamente');
+    };
+
+    // Función para limpiar el formulario cuando no hay datos
+    const limpiarFormulario = () => {
+        // No limpiar el número de documento ni el tipo de documento
+        const camposAMantener = ['numero_documento', 'tipo_documento'];
+        
+        const inputs = form.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            if (!camposAMantener.includes(input.id)) {
+                if (input.type === 'checkbox') {
+                    input.checked = false;
+                } else {
+                    input.value = '';
+                }
+            }
+        });
+        
+        console.log('🧹 Formulario limpiado (excepto documento)');
+    };
+
+    /* VERIFIK - COMENTADO TEMPORALMENTE
     const consultarDatosAutomaticamente = async (numeroDoc, tipoDoc) => {
         try {
             console.log(`🔍 Consultando automáticamente: ${tipoDoc} ${numeroDoc}`);
@@ -343,7 +612,9 @@ const colombianLocations = {
             mostrarIndicadorConsulta(false);
         }
     };
+    */
 
+    /* VERIFIK - COMENTADO TEMPORALMENTE
     const autocompletarFormulario = (datos) => {
         // Autocompletar campo de nombre si está disponible
         if (datos.nombre) {
@@ -365,7 +636,9 @@ const colombianLocations = {
         
         // Se pueden agregar más campos aquí según lo que devuelva Verifik
     };
+    */
 
+    /* VERIFIK - COMENTADO TEMPORALMENTE
     const mostrarIndicadorConsulta = (mostrar) => {
         let indicator = document.getElementById('consulta-indicator');
         
@@ -393,7 +666,9 @@ const colombianLocations = {
             indicator.remove();
         }
     };
+    */
 
+    /* VERIFIK - COMENTADO TEMPORALMENTE
     const mostrarMensajeConsulta = (mensaje, tipo) => {
         let messageDiv = document.getElementById('consulta-message');
         
@@ -428,6 +703,7 @@ const colombianLocations = {
             if (messageDiv) messageDiv.remove();
         }, 4000);
     };
+    */
 
     // Always enforce numeric input AND auto-consulta con Verifik
     numeroDocumentoInput.addEventListener('input', handleDocumentInput);
@@ -461,18 +737,21 @@ const colombianLocations = {
     }
 
     // --- LÓGICA DEL POP-UP DE BIENVENIDA ---
-    giveawayPopup.classList.remove('hidden');
-    // Show immediately
-
-    closePopupBtn.addEventListener("click", () => {
-        giveawayPopup.classList.add("hidden");
+    if (giveawayPopup) {
+        giveawayPopup.classList.remove('hidden');
     }
-    );
 
-    closeModalBtn.addEventListener("click", () => {
-        successModal.classList.remove("visible");
+    if (closePopupBtn && giveawayPopup) {
+        closePopupBtn.addEventListener("click", () => {
+            giveawayPopup.classList.add("hidden");
+        });
     }
-    );
+
+    if (closeModalBtn && successModal) {
+        closeModalBtn.addEventListener("click", () => {
+            successModal.classList.remove("visible");
+        });
+    }
 
     // --- INICIALIZACIÓN DE FLATPCIKR ---
     flatpickr('input[type="date"]', {
@@ -481,7 +760,6 @@ const colombianLocations = {
     });
 
     // --- VALIDACIÓN DE EDAD ---
-    const fechaNacimientoInput = document.querySelector('input[name="fecha_nacimiento"]');
     const submitButton = form.querySelector('button[type="submit"]');
 
     function checkAge() {
@@ -751,7 +1029,9 @@ const colombianLocations = {
     checkAge();
     fechaNacimientoInput.addEventListener('change', checkAge);
 
-    // ===== FUNCIONALIDAD SECCIÓN DE CONSULTA SEPARADA =====
+    // ===== FUNCIONALIDAD SECCIÓN DE CONSULTA SEPARADA CON VERIFIK (COMENTADA TEMPORALMENTE) =====
+    
+    /* VERIFIK - COMENTADO TEMPORALMENTE
     
     // Validación numérica para el campo de consulta
     if (consultaNumeroDoc) {
@@ -943,5 +1223,7 @@ const colombianLocations = {
             }
         });
     }
+    
+    FIN VERIFIK - COMENTADO TEMPORALMENTE */
 
 });

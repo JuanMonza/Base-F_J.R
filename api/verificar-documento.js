@@ -55,6 +55,13 @@ export default async function handler(req, res) {
         return;
     }
 
+    if (req.method === "GET") {
+        // Permitir GET solo para pruebas, no consulta la base de datos
+        return res.status(200).json({
+            message: "Endpoint activo. Usa POST para consultar un documento.",
+            success: true
+        });
+    }
     if (req.method !== "POST") {
         return res.status(405).json({ error: "Method Not Allowed" });
     }
@@ -76,11 +83,11 @@ export default async function handler(req, res) {
             return res.status(200).json(cached.data);
         }
 
-        // Buscar en la base de datos
+        // Buscar en la base de datos - TRAER TODOS LOS CAMPOS
         console.log(`Buscando documento ${numero_documento} en BD...`);
         const { data: existingRecords, error } = await supabase
             .from('registros_formulario')
-            .select('numero_documento, nombre, created_at, updated_at')
+            .select('*') // Traer TODOS los campos
             .eq('numero_documento', numero_documento);
 
         if (error) {
@@ -94,16 +101,12 @@ export default async function handler(req, res) {
         
         console.log(`Resultado búsqueda: ${existingRecord ? 'ENCONTRADO' : 'NO ENCONTRADO'}`);
         if (existingRecord) {
-            console.log(`Documento encontrado: ${existingRecord.nombre}`);
+            console.log(`✅ Documento encontrado: ${existingRecord.nombre} - Cargando TODOS los datos`);
         }
 
         const response = {
             exists: !!existingRecord,
-            data: existingRecord ? {
-                nombre: existingRecord.nombre,
-                registrado: existingRecord.created_at,
-                actualizado: existingRecord.updated_at
-            } : null
+            data: existingRecord || null // Devolver TODOS los campos del registro
         };
 
         // Guardar en caché

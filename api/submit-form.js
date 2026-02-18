@@ -233,7 +233,7 @@ export default async function handler(req, res) {
         };
 
         // --- Primero verificar si el documento ya existe en la base de datos ---
-        console.log(`🔍 Verificando si documento ${dataToInsert.numero_documento} ya existe...`);
+        console.log(`Verificando si documento ${dataToInsert.numero_documento} ya existe...`);
         const { data: existingRecords, error: checkError } = await supabase
             .from('registros_formulario')
             .select('id, numero_documento, created_at')
@@ -251,7 +251,7 @@ export default async function handler(req, res) {
 
         // Si el documento YA EXISTE, hacemos UPDATE en lugar de INSERT
         if (existingRecord) {
-            console.log(`📝 ¡DOCUMENTO DETECTADO! ${dataToInsert.numero_documento} ya existe (ID: ${existingRecord.id}). Actualizando...`);
+            console.log(`¡DOCUMENTO DETECTADO! ${dataToInsert.numero_documento} ya existe (ID: ${existingRecord.id}). Actualizando...`);
             
             const { data: updatedData, error: updateError } = await supabase
                 .from('registros_formulario')
@@ -266,7 +266,7 @@ export default async function handler(req, res) {
                 });
             }
 
-            console.log(`✅ Datos actualizados exitosamente para documento: ${dataToInsert.numero_documento}`);
+            console.log(`Datos actualizados exitosamente para documento: ${dataToInsert.numero_documento}`);
             return res.status(200).json({ 
                 message: "¡Tus datos ya estaban registrados y han sido actualizados exitosamente!",
                 action: "updated"
@@ -274,7 +274,7 @@ export default async function handler(req, res) {
         }
 
         // Si NO EXISTE, hacemos INSERT (nuevo registro)
-        console.log(`➕ Nuevo documento ${dataToInsert.numero_documento}. Insertando...`);
+        console.log(`Nuevo documento ${dataToInsert.numero_documento}. Insertando...`);
         
         const { data: insertedData, error: insertError } = await supabase
             .from('registros_formulario')
@@ -288,7 +288,7 @@ export default async function handler(req, res) {
             });
         }
 
-        console.log(`✅ Nuevo registro creado exitosamente para documento: ${dataToInsert.numero_documento}`);
+        console.log(`Nuevo registro creado exitosamente para documento: ${dataToInsert.numero_documento}`);
         return res.status(200).json({ 
             message: "¡Datos registrados correctamente! Gracias por actualizar tu información.",
             action: "created"
