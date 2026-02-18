@@ -14,7 +14,7 @@ function limpiarCacheExpirado() {
 }
 
 export default async function handler(req, res) {
-    console.log('🔍 Verificando si documento existe en DB');
+    console.log('Verificando si documento existe en DB');
     
     // Limpiar caché expirado
     limpiarCacheExpirado();
@@ -72,7 +72,7 @@ export default async function handler(req, res) {
         const cacheKey = `doc_${numero_documento}`;
         if (verificacionCache.has(cacheKey)) {
             const cached = verificacionCache.get(cacheKey);
-            console.log(`✅ Cache hit para verificación: ${numero_documento}`);
+            console.log(`Cache hit para verificación: ${numero_documento}`);
             return res.status(200).json(cached.data);
         }
 
