@@ -77,18 +77,24 @@ export default async function handler(req, res) {
         }
 
         // Buscar en la base de datos
-        const { data: existingRecord, error } = await supabase
+        console.log(`Buscando documento ${numero_documento} en BD...`);
+        const { data: existingRecords, error } = await supabase
             .from('registros_formulario')
             .select('numero_documento, nombre, created_at, updated_at')
-            .eq('numero_documento', numero_documento)
-            .single();
+            .eq('numero_documento', numero_documento);
 
-        if (error && error.code !== 'PGRST116') {
-            // PGRST116 = No se encontró registro (caso válido)
+        if (error) {
             console.error("Error al verificar documento:", error);
             return res.status(500).json({ 
                 error: "Error al verificar los datos" 
             });
+        }
+
+        const existingRecord = existingRecords && existingRecords.length > 0 ? existingRecords[0] : null;
+        
+        console.log(`Resultado búsqueda: ${existingRecord ? 'ENCONTRADO' : 'NO ENCONTRADO'}`);
+        if (existingRecord) {
+            console.log(`Documento encontrado: ${existingRecord.nombre}`);
         }
 
         const response = {

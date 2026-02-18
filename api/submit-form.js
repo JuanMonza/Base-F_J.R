@@ -233,15 +233,13 @@ export default async function handler(req, res) {
         };
 
         // --- Primero verificar si el documento ya existe en la base de datos ---
-        const { data: existingRecord, error: checkError } = await supabase
+        console.log(`🔍 Verificando si documento ${dataToInsert.numero_documento} ya existe...`);
+        const { data: existingRecords, error: checkError } = await supabase
             .from('registros_formulario')
             .select('id, numero_documento, created_at')
-            .eq('numero_documento', dataToInsert.numero_documento)
-            .single(); // Solo esperamos un resultado
+            .eq('numero_documento', dataToInsert.numero_documento);
 
-        if (checkError && checkError.code !== 'PGRST116') { 
-            // PGRST116 = No se encontró registro (es un caso válido)
-            // Cualquier otro error es un problema real
+        if (checkError) { 
             console.error("Error al verificar documento existente:", checkError);
             return res.status(500).json({ 
                 message: "Error al verificar los datos.",
@@ -249,9 +247,11 @@ export default async function handler(req, res) {
             });
         }
 
+        const existingRecord = existingRecords && existingRecords.length > 0 ? existingRecords[0] : null;
+
         // Si el documento YA EXISTE, hacemos UPDATE en lugar de INSERT
         if (existingRecord) {
-            console.log(`📝 Documento ${dataToInsert.numero_documento} ya existe. Actualizando...`);
+            console.log(`📝 ¡DOCUMENTO DETECTADO! ${dataToInsert.numero_documento} ya existe (ID: ${existingRecord.id}). Actualizando...`);
             
             const { data: updatedData, error: updateError } = await supabase
                 .from('registros_formulario')

@@ -179,6 +179,12 @@ const colombianLocations = {
         const numeroDoc = event.target.value;
         const tipoDoc = tipoDocumentoSelect.value;
         
+        // Si el documento es muy corto o vacío, limpiar notificación
+        if (numeroDoc.length < 6) {
+            ocultarNotificacionDocumentoExistente();
+            lastVerifiedDocument = '';
+        }
+        
         // Solo consultar si el documento es válido y diferente al anterior
         if (numeroDoc.length >= 6 && numeroDoc !== lastConsultedDocument && tipoDoc) {
             // Cancelar consultas anteriores si existen
@@ -203,11 +209,12 @@ const colombianLocations = {
 
     const verificarDocumentoEnBD = async (numeroDoc) => {
         if (numeroDoc === lastVerifiedDocument) {
+            console.log(`⏭️ Saltando verificación: documento ${numeroDoc} ya verificado`);
             return; // Evitar verificaciones duplicadas
         }
 
         try {
-            console.log(`🔍 Verificando si documento existe en BD: ${numeroDoc}`);
+            console.log(`🔍 Verificando si documento ${numeroDoc} existe en BD...`);
             
             const response = await fetch('/api/verificar-documento', {
                 method: 'POST',
@@ -219,18 +226,22 @@ const colombianLocations = {
                 })
             });
 
+            console.log(`📡 Respuesta de verificación: Status ${response.status}`);
+
             if (!response.ok) {
-                console.log('Error al verificar documento');
+                console.error(`❌ Error al verificar documento: ${response.status} ${response.statusText}`);
                 return;
             }
 
             const data = await response.json();
+            console.log('📊 Datos recibidos:', data);
             
             if (data.exists) {
-                console.log('📋 Documento ya existe en BD');
+                console.log(`✅ ¡DOCUMENTO ENCONTRADO EN BD! Nombre: ${data.data?.nombre || 'N/A'}`);
                 mostrarNotificacionDocumentoExistente(data.data);
                 lastVerifiedDocument = numeroDoc;
             } else {
+                console.log(`ℹ️ Documento ${numeroDoc} NO existe en BD (registro nuevo)`);
                 ocultarNotificacionDocumentoExistente();
                 lastVerifiedDocument = '';
             }
