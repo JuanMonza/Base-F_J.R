@@ -166,9 +166,11 @@ const colombianLocations = {
         event.target.value = event.target.value.replace(/[^0-9]/g, '');
     };
 
-    // ===== CONSULTA AUTOMÁTICA CON VERIFIK =====
+    // ===== CONSULTA AUTOMÁTICA CON VERIFIK Y VERIFICACIÓN EN BD =====
     let consultaTimeout = null;
+    let verificacionTimeout = null;
     let lastConsultedDocument = '';
+    let lastVerifiedDocument = '';
 
     const handleDocumentInput = async (event) => {
         // Primero aplicar validación numérica
@@ -179,15 +181,100 @@ const colombianLocations = {
         
         // Solo consultar si el documento es válido y diferente al anterior
         if (numeroDoc.length >= 6 && numeroDoc !== lastConsultedDocument && tipoDoc) {
-            // Cancelar consulta anterior si existe
+            // Cancelar consultas anteriores si existen
             if (consultaTimeout) {
                 clearTimeout(consultaTimeout);
+            }
+            if (verificacionTimeout) {
+                clearTimeout(verificacionTimeout);
             }
             
             // Esperar 2 segundos después de que el usuario termine de escribir
             consultaTimeout = setTimeout(async () => {
                 await consultarDatosAutomaticamente(numeroDoc, tipoDoc);
             }, 2000);
+
+            // Verificar si el documento ya existe en nuestra base de datos
+            verificacionTimeout = setTimeout(async () => {
+                await verificarDocumentoEnBD(numeroDoc);
+            }, 1500);
+        }
+    };
+
+    const verificarDocumentoEnBD = async (numeroDoc) => {
+        if (numeroDoc === lastVerifiedDocument) {
+            return; // Evitar verificaciones duplicadas
+        }
+
+        try {
+            console.log(`🔍 Verificando si documento existe en BD: ${numeroDoc}`);
+            
+            const response = await fetch('/api/verificar-documento', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    numero_documento: numeroDoc
+                })
+            });
+
+            if (!response.ok) {
+                console.log('Error al verificar documento');
+                return;
+            }
+
+            const data = await response.json();
+            
+            if (data.exists) {
+                console.log('📋 Documento ya existe en BD');
+                mostrarNotificacionDocumentoExistente(data.data);
+                lastVerifiedDocument = numeroDoc;
+            } else {
+                ocultarNotificacionDocumentoExistente();
+                lastVerifiedDocument = '';
+            }
+            
+        } catch (error) {
+            console.error('❌ Error al verificar documento en BD:', error);
+        }
+    };
+
+    const mostrarNotificacionDocumentoExistente = (datos) => {
+        // Remover notificación anterior si existe
+        ocultarNotificacionDocumentoExistente();
+        
+        const notificacion = document.createElement('div');
+        notificacion.id = 'notificacion-documento-existente';
+        notificacion.className = 'notificacion-documento-existente';
+        notificacion.innerHTML = `
+            <div style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 8px; padding: 15px; margin: 15px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                    <i class="fas fa-info-circle" style="color: #ff9800; font-size: 24px;"></i>
+                    <h3 style="margin: 0; color: #856404; font-size: 16px;">Información Importante</h3>
+                </div>
+                <p style="margin: 8px 0; color: #856404; font-size: 14px;">
+                    <strong>✅ Tus datos ya están registrados en nuestro sistema.</strong>
+                </p>
+                <p style="margin: 8px 0; color: #856404; font-size: 13px;">
+                    ${datos.nombre ? `Registrado a nombre de: <strong>${datos.nombre}</strong>` : ''}
+                </p>
+                <p style="margin: 8px 0; color: #856404; font-size: 13px;">
+                    Si deseas actualizar tu información, continúa llenando el formulario y haz clic en "Enviar". 
+                    Tus datos se actualizarán automáticamente.
+                </p>
+            </div>
+        `;
+        
+        // Insertar después del campo de número de documento
+        const numeroDocField = document.getElementById('numero_documento');
+        numeroDocField.parentNode.insertBefore(notificacion, numeroDocField.nextSibling);
+    };
+
+    const ocultarNotificacionDocumentoExistente = () => {
+        const notificacion = document.getElementById('notificacion-documento-existente');
+        if (notificacion) {
+            notificacion.remove();
         }
     };
 
@@ -605,7 +692,23 @@ const colombianLocations = {
             const result = await response.json();
 
             // Éxito al enviar
-            modalMessage.textContent = result.message || '¡Formulario enviado con éxito!';
+            // Mostrar mensaje personalizado según si fue actualización o creación
+            if (result.action === 'updated') {
+                modalMessage.innerHTML = `
+                    <div style="text-align: center;">
+                        <p style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">✅ ${result.message}</p>
+                        <p style="font-size: 14px; color: #666;">Tus datos ya estaban en nuestro sistema y han sido actualizados correctamente.</p>
+                    </div>
+                `;
+            } else {
+                modalMessage.innerHTML = `
+                    <div style="text-align: center;">
+                        <p style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">✅ ${result.message}</p>
+                        <p style="font-size: 14px; color: #666;">Hemos registrado tu información exitosamente.</p>
+                    </div>
+                `;
+            }
+            
             modalIcon.className = 'modal-icon success';
             modalIconI.className = 'fas fa-check-circle';
             successModal.classList.add('visible');

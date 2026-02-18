@@ -232,29 +232,66 @@ export default async function handler(req, res) {
             privacidad: data.privacidad === 'true' || data.privacidad === true // BOOLEAN en BD
         };
 
-        // --- Insertar datos en Supabase ---
-        const { data: insertedData, error } = await supabase
+        // --- Primero verificar si el documento ya existe en la base de datos ---
+        const { data: existingRecord, error: checkError } = await supabase
             .from('registros_formulario')
-            .insert([dataToInsert]); // Inserta los datos del formulario
+            .select('id, numero_documento, created_at')
+            .eq('numero_documento', dataToInsert.numero_documento)
+            .single(); // Solo esperamos un resultado
 
-        if (error) {
-            console.error("Error al insertar en Supabase:", error);
-
-            // Detectar error de duplicado (unique constraint violation)
-            if (error.code === '23505') { // Código de error estándar de PostgreSQL para 'unique_violation'
-                return res.status(409).json({ // 409 Conflict es el código HTTP apropiado
-                    message: "Este número de documento ya ha sido registrado."
-                });
-            }
-
+        if (checkError && checkError.code !== 'PGRST116') { 
+            // PGRST116 = No se encontró registro (es un caso válido)
+            // Cualquier otro error es un problema real
+            console.error("Error al verificar documento existente:", checkError);
             return res.status(500).json({ 
-                message: "Error al guardar los datos en la base de datos.",
-                error: error.message 
+                message: "Error al verificar los datos.",
+                error: checkError.message 
             });
         }
 
+        // Si el documento YA EXISTE, hacemos UPDATE en lugar de INSERT
+        if (existingRecord) {
+            console.log(`📝 Documento ${dataToInsert.numero_documento} ya existe. Actualizando...`);
+            
+            const { data: updatedData, error: updateError } = await supabase
+                .from('registros_formulario')
+                .update(dataToInsert)
+                .eq('numero_documento', dataToInsert.numero_documento);
+
+            if (updateError) {
+                console.error("Error al actualizar en Supabase:", updateError);
+                return res.status(500).json({ 
+                    message: "Error al actualizar los datos.",
+                    error: updateError.message 
+                });
+            }
+
+            console.log(`✅ Datos actualizados exitosamente para documento: ${dataToInsert.numero_documento}`);
+            return res.status(200).json({ 
+                message: "¡Tus datos ya estaban registrados y han sido actualizados exitosamente!",
+                action: "updated"
+            });
+        }
+
+        // Si NO EXISTE, hacemos INSERT (nuevo registro)
+        console.log(`➕ Nuevo documento ${dataToInsert.numero_documento}. Insertando...`);
+        
+        const { data: insertedData, error: insertError } = await supabase
+            .from('registros_formulario')
+            .insert([dataToInsert]);
+
+        if (insertError) {
+            console.error("Error al insertar en Supabase:", insertError);
+            return res.status(500).json({ 
+                message: "Error al guardar los datos en la base de datos.",
+                error: insertError.message 
+            });
+        }
+
+        console.log(`✅ Nuevo registro creado exitosamente para documento: ${dataToInsert.numero_documento}`);
         return res.status(200).json({ 
-            message: "Datos recibidos y guardados correctamente. ¡Gracias!" 
+            message: "¡Datos registrados correctamente! Gracias por actualizar tu información.",
+            action: "created"
         });
 
     } catch (error) {

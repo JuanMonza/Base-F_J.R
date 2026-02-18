@@ -944,3 +944,44 @@ footer a:hover {
     letter-spacing: 1px;
     background: var(--container-background);
 }
+
+/* ===== NOTIFICACIÓN DE DOCUMENTO EXISTENTE ===== */
+.notificacion-documento-existente {
+    animation: slideDown 0.4s ease-out;
+    margin-top: 10px;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}
+
+/* Estilo para mensajes de consulta y verificación */
+#consulta-indicator,
+#consulta-message {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
