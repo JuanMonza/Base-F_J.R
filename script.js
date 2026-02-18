@@ -217,19 +217,21 @@ const colombianLocations = {
                 console.log('📊 Resultado de consulta:', data);
 
                 if (data.exists && data.data) {
-                    // ✅ DOCUMENTO EXISTE - Autocompletar y bloquear campos
+                    // ✅ DOCUMENTO EXISTE - Autocompletar y bloquear campos protegidos
                     console.log(`✅ Documento encontrado: ${data.data.nombre}`);
                     mostrarResultadoConsulta(
-                        `✅ Datos encontrados para: ${data.data.nombre}<br><small>Los campos bloqueados no se pueden modificar.</small>`,
+                        `✅ <strong>Tus datos ya están registrados.</strong><br>
+                        <span style='color:#155724;'>Solo puedes actualizar los campos permitidos.<br>Los campos principales están bloqueados por seguridad.</span><br>
+                        <b>Nombre:</b> ${data.data.nombre || ''}<br>
+                        <b>Tipo de documento:</b> ${data.data.tipo_documento || ''}<br>
+                        <b>Número de documento:</b> ${data.data.numero_documento || ''}<br>
+                        <b>Fecha de nacimiento:</b> ${data.data.fecha_nacimiento || ''}`,
                         'success'
                     );
-                    
-                    // Autocompletar formulario
+                    // Autocompletar todos los campos
                     autocompletarFormularioCompleto(data.data);
-                    
-                    // Bloquear campos que no se pueden modificar
+                    // Bloquear solo los campos protegidos
                     bloquearCamposProtegidos(true);
-                    
                 } else {
                     // ℹ️ DOCUMENTO NO EXISTE - Permitir llenar todo
                     console.log(`ℹ️ Documento ${numeroDoc} no encontrado - formulario nuevo`);
