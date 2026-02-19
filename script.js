@@ -940,6 +940,12 @@ const colombianLocations = {
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
 
+        // Los campos disabled no viajan en FormData. Enviar siempre los campos protegidos.
+        data.nombre = nombreInput?.value || data.nombre || '';
+        data.tipo_documento = tipoDocumentoSelect?.value || data.tipo_documento || '';
+        data.numero_documento = numeroDocumentoInput?.value || data.numero_documento || '';
+        data.fecha_nacimiento = fechaNacimientoInput?.value || data.fecha_nacimiento || '';
+
         // Asegurarse de que los checkboxes y selects envíen valores booleanos (true/false)
         data.privacidad = formData.has('privacidad');
         data.familia_extranjero = (formData.get('familia_extranjero') === 'Si');
@@ -971,7 +977,7 @@ const colombianLocations = {
                 // Intentar leer un mensaje de error específico del cuerpo de la respuesta
                 try {
                     const errorResult = await response.json();
-                    errorMessage = errorResult.message || errorMessage;
+                    errorMessage = errorResult.message || errorResult.error || errorMessage;
                 } catch (e) {
                     // Si el cuerpo no es JSON (ej. una página de error 404 en HTML),
                     // mostramos un mensaje genérico para ese caso.

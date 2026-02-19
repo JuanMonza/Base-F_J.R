@@ -243,6 +243,12 @@ export default async function handler(req, res) {
         const normalizedNumeroDocumento = normalizeDocumentNumber(data.numero_documento);
         const normalizedTipoDocumento = normalizeDocumentType(data.tipo_documento);
 
+        if (!normalizedNumeroDocumento) {
+            return res.status(400).json({
+                message: "Número de documento requerido"
+            });
+        }
+
         // PROTECCIÓN 4: Validación básica de formato
         if (!isValidString(data.nombre) && data.nombre) {
             console.log(`Nombre inválido desde ${clientIP}`);
@@ -337,8 +343,12 @@ export default async function handler(req, res) {
             console.log(`¡DOCUMENTO DETECTADO! ${dataToInsert.numero_documento} ya existe (ID: ${existingRecord.id}). Actualizando...`);
             const dataToUpdate = {
                 ...dataToInsert,
+                // Campos protegidos: si no llegan desde frontend (disabled), preservar existentes
+                nombre: dataToInsert.nombre ?? existingRecord.nombre,
                 // Si ya existía, preserva su tipo de documento original
-                tipo_documento: existingRecord.tipo_documento || dataToInsert.tipo_documento
+                tipo_documento: existingRecord.tipo_documento || dataToInsert.tipo_documento,
+                numero_documento: existingRecord.numero_documento || dataToInsert.numero_documento,
+                fecha_nacimiento: dataToInsert.fecha_nacimiento ?? existingRecord.fecha_nacimiento
             };
 
             const recordChanged = hasRecordChanges(existingRecord, dataToUpdate);
