@@ -9,6 +9,38 @@ function normalizeDocumentNumber(value) {
     return value.trim().replace(/[.\-\s]/g, '');
 }
 
+function normalizeDocumentType(value) {
+    if (!value || typeof value !== 'string') return '';
+    const cleaned = value
+        .trim()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, '');
+
+    if (cleaned === 'CC' || cleaned.includes('CEDULADECIUDADANIA')) return 'CC';
+    if (cleaned === 'CE' || cleaned.includes('CEDULADEEXTRANJERIA')) return 'CE';
+    if (cleaned === 'PEP' || cleaned.includes('PERMISOESPECIALDEPERMANENCIA')) return 'PEP';
+    return cleaned;
+}
+
+function buildLooseLikePattern(doc) {
+    return `%${doc.split('').join('%')}%`;
+}
+
+function pickMatchingRecord(records, numeroDocumentoNormalizado, tipoDocumentoNormalizado) {
+    if (!Array.isArray(records) || records.length === 0) return null;
+
+    return records.find((row) => {
+        const rowDoc = normalizeDocumentNumber(row.numero_documento || '');
+        if (rowDoc !== numeroDocumentoNormalizado) return false;
+
+        if (!tipoDocumentoNormalizado) return true;
+        const rowType = normalizeDocumentType(row.tipo_documento || '');
+        return rowType === tipoDocumentoNormalizado;
+    }) || null;
+}
+
 function limpiarCacheExpirado() {
     const ahora = Date.now();
     for (const [key, value] of verificacionCache.entries()) {
@@ -73,7 +105,7 @@ export default async function handler(req, res) {
 
     try {
         const { numero_documento, tipo_documento } = req.body;
-        const tipoDocumentoNormalizado = tipo_documento ? String(tipo_documento).trim().toUpperCase() : '';
+        const tipoDocumentoNormalizado = normalizeDocumentType(tipo_documento);
         const numeroDocumentoNormalizado = normalizeDocumentNumber(numero_documento);
         
         if (!numeroDocumentoNormalizado) {
@@ -92,26 +124,46 @@ export default async function handler(req, res) {
 
         // Buscar en la base de datos - TRAER TODOS LOS CAMPOS
         console.log(`Buscando documento ${numeroDocumentoNormalizado} en BD...`);
-        let query = supabase
+        const { data: exactRecords, error: exactError } = await supabase
             .from('registros_formulario')
             .select('*') // Traer TODOS los campos
             .eq('numero_documento', numeroDocumentoNormalizado)
-            .limit(1);
+            .limit(20);
 
-        if (tipoDocumentoNormalizado) {
-            query = query.eq('tipo_documento', tipoDocumentoNormalizado);
-        }
-
-        const { data: existingRecords, error } = await query;
-
-        if (error) {
-            console.error("Error al verificar documento:", error);
+        if (exactError) {
+            console.error("Error al verificar documento (exact):", exactError);
             return res.status(500).json({ 
                 error: "Error al verificar los datos" 
             });
         }
 
-        const existingRecord = existingRecords && existingRecords.length > 0 ? existingRecords[0] : null;
+        let existingRecord = pickMatchingRecord(
+            exactRecords,
+            numeroDocumentoNormalizado,
+            tipoDocumentoNormalizado
+        );
+
+        if (!existingRecord) {
+            const pattern = buildLooseLikePattern(numeroDocumentoNormalizado);
+            const { data: fuzzyRecords, error: fuzzyError } = await supabase
+                .from('registros_formulario')
+                .select('*')
+                .ilike('numero_documento', pattern)
+                .limit(100);
+
+            if (fuzzyError) {
+                console.error("Error al verificar documento (fuzzy):", fuzzyError);
+                return res.status(500).json({ 
+                    error: "Error al verificar los datos" 
+                });
+            }
+
+            existingRecord = pickMatchingRecord(
+                fuzzyRecords,
+                numeroDocumentoNormalizado,
+                tipoDocumentoNormalizado
+            );
+        }
         
         console.log(`Resultado búsqueda: ${existingRecord ? 'ENCONTRADO' : 'NO ENCONTRADO'}`);
         if (existingRecord) {

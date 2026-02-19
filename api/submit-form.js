@@ -89,6 +89,38 @@ function normalizeDocumentNumber(value) {
     return value.trim().replace(/[.\-\s]/g, '');
 }
 
+function normalizeDocumentType(value) {
+    if (!value || typeof value !== 'string') return '';
+    const cleaned = value
+        .trim()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, '');
+
+    if (cleaned === 'CC' || cleaned.includes('CEDULADECIUDADANIA')) return 'CC';
+    if (cleaned === 'CE' || cleaned.includes('CEDULADEEXTRANJERIA')) return 'CE';
+    if (cleaned === 'PEP' || cleaned.includes('PERMISOESPECIALDEPERMANENCIA')) return 'PEP';
+    return cleaned;
+}
+
+function buildLooseLikePattern(doc) {
+    return `%${doc.split('').join('%')}%`;
+}
+
+function pickMatchingRecord(records, numeroDocumentoNormalizado, tipoDocumentoNormalizado) {
+    if (!Array.isArray(records) || records.length === 0) return null;
+
+    return records.find((row) => {
+        const rowDoc = normalizeDocumentNumber(row.numero_documento || '');
+        if (rowDoc !== numeroDocumentoNormalizado) return false;
+
+        if (!tipoDocumentoNormalizado) return true;
+        const rowType = normalizeDocumentType(row.tipo_documento || '');
+        return rowType === tipoDocumentoNormalizado;
+    }) || null;
+}
+
 export default async function handler(req, res) {
     const startTime = Date.now();
     const clientIP = getClientIP(req);
@@ -186,6 +218,7 @@ export default async function handler(req, res) {
         }
 
         const normalizedNumeroDocumento = normalizeDocumentNumber(data.numero_documento);
+        const normalizedTipoDocumento = normalizeDocumentType(data.tipo_documento);
 
         // PROTECCIÓN 4: Validación básica de formato
         if (!isValidString(data.nombre) && data.nombre) {
@@ -220,7 +253,7 @@ export default async function handler(req, res) {
         // PROTECCIÓN 6: Sanitizar todos los datos antes de insertar
         const dataToInsert = {
             nombre: sanitizeString(data.nombre),
-            tipo_documento: sanitizeString(data.tipo_documento ? String(data.tipo_documento).toUpperCase() : data.tipo_documento),
+            tipo_documento: sanitizeString(normalizedTipoDocumento),
             numero_documento: sanitizeString(normalizedNumeroDocumento),
             fecha_nacimiento: sanitizeString(data.fecha_nacimiento),
             departamento: sanitizeString(data.departamento),
@@ -241,41 +274,57 @@ export default async function handler(req, res) {
 
         // --- Primero verificar si el documento ya existe en la base de datos ---
         console.log(`Verificando si documento ${dataToInsert.numero_documento} ya existe...`);
-        let existingQuery = supabase
+        const { data: exactRecords, error: exactError } = await supabase
             .from('registros_formulario')
-            .select('id, numero_documento, created_at')
-            .eq('numero_documento', dataToInsert.numero_documento);
+            .select('id, numero_documento, tipo_documento, created_at')
+            .eq('numero_documento', dataToInsert.numero_documento)
+            .limit(20);
 
-        if (dataToInsert.tipo_documento) {
-            existingQuery = existingQuery.eq('tipo_documento', dataToInsert.tipo_documento);
-        }
-
-        const { data: existingRecords, error: checkError } = await existingQuery;
-
-        if (checkError) { 
-            console.error("Error al verificar documento existente:", checkError);
+        if (exactError) {
+            console.error("Error al verificar documento existente (exact):", exactError);
             return res.status(500).json({ 
                 message: "Error al verificar los datos.",
-                error: checkError.message 
+                error: exactError.message 
             });
         }
 
-        const existingRecord = existingRecords && existingRecords.length > 0 ? existingRecords[0] : null;
+        let existingRecord = pickMatchingRecord(
+            exactRecords,
+            normalizedNumeroDocumento,
+            normalizedTipoDocumento
+        );
+
+        if (!existingRecord) {
+            const pattern = buildLooseLikePattern(normalizedNumeroDocumento);
+            const { data: fuzzyRecords, error: fuzzyError } = await supabase
+                .from('registros_formulario')
+                .select('id, numero_documento, tipo_documento, created_at')
+                .ilike('numero_documento', pattern)
+                .limit(100);
+
+            if (fuzzyError) {
+                console.error("Error al verificar documento existente (fuzzy):", fuzzyError);
+                return res.status(500).json({ 
+                    message: "Error al verificar los datos.",
+                    error: fuzzyError.message 
+                });
+            }
+
+            existingRecord = pickMatchingRecord(
+                fuzzyRecords,
+                normalizedNumeroDocumento,
+                normalizedTipoDocumento
+            );
+        }
 
         // Si el documento YA EXISTE, hacemos UPDATE en lugar de INSERT
         if (existingRecord) {
             console.log(`¡DOCUMENTO DETECTADO! ${dataToInsert.numero_documento} ya existe (ID: ${existingRecord.id}). Actualizando...`);
             
-            let updateQuery = supabase
+            const { data: updatedData, error: updateError } = await supabase
                 .from('registros_formulario')
                 .update(dataToInsert)
-                .eq('numero_documento', dataToInsert.numero_documento);
-
-            if (dataToInsert.tipo_documento) {
-                updateQuery = updateQuery.eq('tipo_documento', dataToInsert.tipo_documento);
-            }
-
-            const { data: updatedData, error: updateError } = await updateQuery;
+                .eq('id', existingRecord.id);
 
             if (updateError) {
                 console.error("Error al actualizar en Supabase:", updateError);
