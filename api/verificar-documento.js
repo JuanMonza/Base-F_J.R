@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 
 // Cache para evitar consultas duplicadas
 const verificacionCache = new Map();
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutos
+const CACHE_TTL = 10 * 1000; // 10 segundos para pruebas
 
 function limpiarCacheExpirado() {
     const ahora = Date.now();
