@@ -6,7 +6,7 @@ const submissions = new Map();
 // Configuración de seguridad
 const SECURITY_CONFIG = {
     MAX_SUBMISSIONS_PER_IP: 500,       // Máximo 500 envíos por IP por hora
-    MAX_SUBMISSIONS_PER_DOC: 5,      // Máximo 5 envíos por documento por día (TEMPORAL PARA TESTING)
+    MAX_SUBMISSIONS_PER_DOC: 50,      // Máximo 50 envíos por documento por día (TEMPORAL PARA TESTING)
     TIME_WINDOW: 60 * 60 * 1000,     // 1 hora en milisegundos
     DOC_TIME_WINDOW: 24 * 60 * 60 * 1000, // 24 horas
     MAX_PAYLOAD_SIZE: 10240,          // 10KB máximo
@@ -97,7 +97,7 @@ export default async function handler(req, res) {
     
     // Validar que las variables de entorno estén disponibles
     if (!supabaseUrl || !supabaseKey) {
-        console.error('❌ Error de configuración de Supabase:', {
+        console.error('Error de configuración de Supabase:', {
             supabaseUrl: !!supabaseUrl,
             supabaseKey: !!supabaseKey,
             env_SUPABASE_URL: !!process.env.SUPABASE_URL,
@@ -133,7 +133,7 @@ export default async function handler(req, res) {
     }
 
     if (req.method !== "POST") {
-        console.log(`❌ Método no permitido: ${req.method} desde ${clientIP}`);
+        console.log(`Método no permitido: ${req.method} desde ${clientIP}`);
         return res.status(405).json({ message: "Method Not Allowed" });
     }
 
@@ -146,7 +146,7 @@ export default async function handler(req, res) {
     const recentSubmissions = ipSubmissions.filter(time => now - time < SECURITY_CONFIG.TIME_WINDOW);
     
     if (recentSubmissions.length >= SECURITY_CONFIG.MAX_SUBMISSIONS_PER_IP) {
-        console.log(`🚫 Rate limit IP excedido: ${clientIP} (${recentSubmissions.length}/${SECURITY_CONFIG.MAX_SUBMISSIONS_PER_IP} en ${SECURITY_CONFIG.TIME_WINDOW/1000/60} min)`);
+        console.log(`Rate limit IP excedido: ${clientIP} (${recentSubmissions.length}/${SECURITY_CONFIG.MAX_SUBMISSIONS_PER_IP} en ${SECURITY_CONFIG.TIME_WINDOW/1000/60} min)`);
         return res.status(429).json({ 
             message: "Demasiadas solicitudes desde tu IP. Intenta de nuevo más tarde.",
             retryAfter: Math.ceil(SECURITY_CONFIG.TIME_WINDOW / 1000 / 60) + " minutos"
@@ -160,12 +160,12 @@ export default async function handler(req, res) {
     try {
         const data = req.body; // En Vercel, el body ya viene parseado
 
-        console.log(`✅ Formulario recibido desde ${clientIP}`);
+        console.log(`Formulario recibido desde ${clientIP}`);
 
         // PROTECCIÓN 2: Validar tamaño del payload
         const payloadSize = JSON.stringify(data).length;
         if (payloadSize > SECURITY_CONFIG.MAX_PAYLOAD_SIZE) {
-            console.log(`🚫 Payload demasiado grande: ${payloadSize} bytes desde ${clientIP}`);
+            console.log(`Payload demasiado grande: ${payloadSize} bytes desde ${clientIP}`);
             return res.status(413).json({ message: "Datos demasiado grandes" });
         }
 
@@ -176,18 +176,18 @@ export default async function handler(req, res) {
 
         // PROTECCIÓN 3: Detectar campos honeypot (campos trampa para bots)
         if (data.honeypot || data.website || data.url) {
-            console.log(`🍯 Honeypot detectado desde ${clientIP}`);
+            console.log(`Honeypot detectado desde ${clientIP}`);
             return res.status(400).json({ message: "Solicitud inválida" });
         }
 
         // PROTECCIÓN 4: Validación básica de formato
         if (!isValidString(data.nombre) && data.nombre) {
-            console.log(`🚫 Nombre inválido desde ${clientIP}`);
+            console.log(`Nombre inválido desde ${clientIP}`);
             return res.status(400).json({ message: "Formato de nombre inválido" });
         }
         
         if (!isValidDocument(data.numero_documento) && data.numero_documento) {
-            console.log(`🚫 Documento inválido desde ${clientIP}`);
+            console.log(`Documento inválido desde ${clientIP}`);
             return res.status(400).json({ message: "Formato de documento inválido" });
         }
 
@@ -198,7 +198,7 @@ export default async function handler(req, res) {
             const recentDocSubmissions = docSubmissions.filter(time => now - time < SECURITY_CONFIG.DOC_TIME_WINDOW);
             
             if (recentDocSubmissions.length >= SECURITY_CONFIG.MAX_SUBMISSIONS_PER_DOC) {
-                console.log(`🚫 Límite de documento excedido: ${data.numero_documento} (${recentDocSubmissions.length}/${SECURITY_CONFIG.MAX_SUBMISSIONS_PER_DOC}) desde ${clientIP}`);
+                console.log(`Límite de documento excedido: ${data.numero_documento} (${recentDocSubmissions.length}/${SECURITY_CONFIG.MAX_SUBMISSIONS_PER_DOC}) desde ${clientIP}`);
                 return res.status(429).json({ 
                     message: `Este documento ya alcanzó el límite de registros (${SECURITY_CONFIG.MAX_SUBMISSIONS_PER_DOC} por día). Intenta mañana.`,
                     retryAfter: "24 horas"
