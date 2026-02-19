@@ -26,6 +26,7 @@ dist/
 # Archivos privados y sensibles (NO SUBIR A GITHUB)
 INSTRUCCIONES_MIGRACION.md
 create_table.sql
+create_update_history_table.sql
 deploy.ps1
 deploy.sh
 .env.example

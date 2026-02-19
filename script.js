@@ -993,6 +993,13 @@ const colombianLocations = {
                         <p style="font-size: 14px; color: #666;">Tus datos ya estaban en nuestro sistema y han sido actualizados correctamente.</p>
                     </div>
                 `;
+            } else if (result.action === 'unchanged') {
+                modalMessage.innerHTML = `
+                    <div style="text-align: center;">
+                        <p style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">ℹ️ ${result.message}</p>
+                        <p style="font-size: 14px; color: #666;">No hicimos cambios porque la información enviada es igual a la registrada.</p>
+                    </div>
+                `;
             } else {
                 modalMessage.innerHTML = `
                     <div style="text-align: center;">

@@ -128,6 +128,22 @@ function pickMatchingRecord(records, numeroDocumentoNormalizado) {
     return matches[0];
 }
 
+function normalizeComparableValue(value) {
+    if (value === undefined) return null;
+    if (typeof value === 'string') return value.trim();
+    return value;
+}
+
+function hasRecordChanges(currentRecord, nextValues) {
+    if (!currentRecord || !nextValues) return false;
+
+    return Object.keys(nextValues).some((key) => {
+        const currentValue = normalizeComparableValue(currentRecord[key]);
+        const nextValue = normalizeComparableValue(nextValues[key]);
+        return currentValue !== nextValue;
+    });
+}
+
 export default async function handler(req, res) {
     const startTime = Date.now();
     const clientIP = getClientIP(req);
@@ -283,7 +299,7 @@ export default async function handler(req, res) {
         console.log(`Verificando si documento ${dataToInsert.numero_documento} ya existe...`);
         const { data: exactRecords, error: exactError } = await supabase
             .from('registros_formulario')
-            .select('id, numero_documento, tipo_documento, created_at')
+            .select('*')
             .eq('numero_documento', dataToInsert.numero_documento)
             .limit(20);
 
@@ -301,7 +317,7 @@ export default async function handler(req, res) {
             const pattern = buildLooseLikePattern(normalizedNumeroDocumento);
             const { data: fuzzyRecords, error: fuzzyError } = await supabase
                 .from('registros_formulario')
-                .select('id, numero_documento, tipo_documento, created_at')
+                .select('*')
                 .ilike('numero_documento', pattern)
                 .limit(100);
 
@@ -324,11 +340,22 @@ export default async function handler(req, res) {
                 // Si ya existía, preserva su tipo de documento original
                 tipo_documento: existingRecord.tipo_documento || dataToInsert.tipo_documento
             };
+
+            const recordChanged = hasRecordChanges(existingRecord, dataToUpdate);
+            if (!recordChanged) {
+                console.log(`Sin cambios para documento ${dataToInsert.numero_documento}. No se actualiza.`);
+                return res.status(200).json({
+                    message: "No se detectaron cambios en la información. No fue necesario actualizar.",
+                    action: "unchanged"
+                });
+            }
             
             const { data: updatedData, error: updateError } = await supabase
                 .from('registros_formulario')
                 .update(dataToUpdate)
-                .eq('id', existingRecord.id);
+                .eq('id', existingRecord.id)
+                .select('*')
+                .limit(1);
 
             if (updateError) {
                 console.error("Error al actualizar en Supabase:", updateError);
@@ -338,10 +365,34 @@ export default async function handler(req, res) {
                 });
             }
 
+            const updatedRecord = Array.isArray(updatedData) && updatedData.length > 0
+                ? updatedData[0]
+                : { ...existingRecord, ...dataToUpdate, id: existingRecord.id };
+
+            const auditPayload = {
+                registro_id: existingRecord.id,
+                numero_documento: dataToUpdate.numero_documento,
+                tipo_documento: dataToUpdate.tipo_documento,
+                datos_anteriores: existingRecord,
+                datos_actualizados: updatedRecord,
+                actualizado_por_ip: clientIP,
+                user_agent: req.headers['user-agent']?.substring(0, 500) || null
+            };
+
+            const { error: auditError } = await supabase
+                .from('registros_formulario_actualizaciones')
+                .insert([auditPayload]);
+
+            const auditLogged = !auditError;
+            if (auditError) {
+                console.error("Error al guardar historial de actualización:", auditError);
+            }
+
             console.log(`Datos actualizados exitosamente para documento: ${dataToInsert.numero_documento}`);
             return res.status(200).json({ 
                 message: "¡Tus datos ya estaban registrados y han sido actualizados exitosamente!",
-                action: "updated"
+                action: "updated",
+                auditLogged
             });
         }
 
