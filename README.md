@@ -81,6 +81,7 @@ Para ejecutar este proyecto en tu máquina local, sigue estos pasos:
     ```
     SUPABASE_URL=TU_PROJECT_URL_DE_SUPABASE
     SUPABASE_ANON_KEY=TU_CLAVE_ANON_PUBLIC_DE_SUPABASE
+    SUPABASE_SERVICE_ROLE_KEY=TU_SERVICE_ROLE_KEY_SOLO_BACKEND
     ```
 
 ### 4. Instalar Dependencias y Ejecutar

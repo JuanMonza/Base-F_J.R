@@ -205,7 +205,8 @@ const colombianLocations = {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        numero_documento: numeroDoc
+                        numero_documento: numeroDoc,
+                        tipo_documento: tipoDoc
                     })
                 });
 
@@ -339,7 +340,7 @@ const colombianLocations = {
         // La consulta ahora se hace SOLO con el botón "Consultar"
     };
 
-    const verificarDocumentoEnBD = async (numeroDoc) => {
+    const verificarDocumentoEnBD = async (numeroDoc, tipoDoc = tipoDocumentoSelect?.value) => {
         if (numeroDoc === lastVerifiedDocument) {
             console.log(`⏭️ Saltando verificación: documento ${numeroDoc} ya verificado`);
             return; // Evitar verificaciones duplicadas
@@ -354,7 +355,8 @@ const colombianLocations = {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    numero_documento: numeroDoc
+                    numero_documento: numeroDoc,
+                    tipo_documento: tipoDoc
                 })
             });
 

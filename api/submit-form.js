@@ -84,6 +84,11 @@ function sanitizeEmail(email) {
     return (sanitized && isValidEmail(sanitized)) ? sanitized : null;
 }
 
+function normalizeDocumentNumber(value) {
+    if (!value || typeof value !== 'string') return '';
+    return value.trim().replace(/[.\-\s]/g, '');
+}
+
 export default async function handler(req, res) {
     const startTime = Date.now();
     const clientIP = getClientIP(req);
@@ -93,15 +98,15 @@ export default async function handler(req, res) {
     
     // Obtener variables de entorno de Supabase
     const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     
     // Validar que las variables de entorno estén disponibles
     if (!supabaseUrl || !supabaseKey) {
         console.error('Error de configuración de Supabase:', {
             supabaseUrl: !!supabaseUrl,
-            supabaseKey: !!supabaseKey,
+            supabaseServiceRoleKey: !!supabaseKey,
             env_SUPABASE_URL: !!process.env.SUPABASE_URL,
-            env_SUPABASE_ANON_KEY: !!process.env.SUPABASE_ANON_KEY
+            env_SUPABASE_SERVICE_ROLE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY
         });
         return res.status(500).json({ 
             message: "Error de configuración del servidor" 
@@ -180,25 +185,27 @@ export default async function handler(req, res) {
             return res.status(400).json({ message: "Solicitud inválida" });
         }
 
+        const normalizedNumeroDocumento = normalizeDocumentNumber(data.numero_documento);
+
         // PROTECCIÓN 4: Validación básica de formato
         if (!isValidString(data.nombre) && data.nombre) {
             console.log(`Nombre inválido desde ${clientIP}`);
             return res.status(400).json({ message: "Formato de nombre inválido" });
         }
         
-        if (!isValidDocument(data.numero_documento) && data.numero_documento) {
+        if (!isValidDocument(normalizedNumeroDocumento) && normalizedNumeroDocumento) {
             console.log(`Documento inválido desde ${clientIP}`);
             return res.status(400).json({ message: "Formato de documento inválido" });
         }
 
         // PROTECCIÓN 5: Rate limiting por documento (configurable para testing)
-        if (data.numero_documento) {
-            const docKey = `doc_${data.numero_documento}`;
+        if (normalizedNumeroDocumento) {
+            const docKey = `doc_${normalizedNumeroDocumento}`;
             const docSubmissions = submissions.get(docKey) || [];
             const recentDocSubmissions = docSubmissions.filter(time => now - time < SECURITY_CONFIG.DOC_TIME_WINDOW);
             
             if (recentDocSubmissions.length >= SECURITY_CONFIG.MAX_SUBMISSIONS_PER_DOC) {
-                console.log(`Límite de documento excedido: ${data.numero_documento} (${recentDocSubmissions.length}/${SECURITY_CONFIG.MAX_SUBMISSIONS_PER_DOC}) desde ${clientIP}`);
+                console.log(`Límite de documento excedido: ${normalizedNumeroDocumento} (${recentDocSubmissions.length}/${SECURITY_CONFIG.MAX_SUBMISSIONS_PER_DOC}) desde ${clientIP}`);
                 return res.status(429).json({ 
                     message: `Este documento ya alcanzó el límite de registros (${SECURITY_CONFIG.MAX_SUBMISSIONS_PER_DOC} por día). Intenta mañana.`,
                     retryAfter: "24 horas"
@@ -207,14 +214,14 @@ export default async function handler(req, res) {
             
             recentDocSubmissions.push(now);
             submissions.set(docKey, recentDocSubmissions);
-            console.log(`✅ Documento registrado: ${data.numero_documento} (${recentDocSubmissions.length}/${SECURITY_CONFIG.MAX_SUBMISSIONS_PER_DOC})`);
+            console.log(`✅ Documento registrado: ${normalizedNumeroDocumento} (${recentDocSubmissions.length}/${SECURITY_CONFIG.MAX_SUBMISSIONS_PER_DOC})`);
         }
 
         // PROTECCIÓN 6: Sanitizar todos los datos antes de insertar
         const dataToInsert = {
             nombre: sanitizeString(data.nombre),
-            tipo_documento: sanitizeString(data.tipo_documento),
-            numero_documento: sanitizeString(data.numero_documento),
+            tipo_documento: sanitizeString(data.tipo_documento ? String(data.tipo_documento).toUpperCase() : data.tipo_documento),
+            numero_documento: sanitizeString(normalizedNumeroDocumento),
             fecha_nacimiento: sanitizeString(data.fecha_nacimiento),
             departamento: sanitizeString(data.departamento),
             ciudad: sanitizeString(data.ciudad),
@@ -234,10 +241,16 @@ export default async function handler(req, res) {
 
         // --- Primero verificar si el documento ya existe en la base de datos ---
         console.log(`Verificando si documento ${dataToInsert.numero_documento} ya existe...`);
-        const { data: existingRecords, error: checkError } = await supabase
+        let existingQuery = supabase
             .from('registros_formulario')
             .select('id, numero_documento, created_at')
             .eq('numero_documento', dataToInsert.numero_documento);
+
+        if (dataToInsert.tipo_documento) {
+            existingQuery = existingQuery.eq('tipo_documento', dataToInsert.tipo_documento);
+        }
+
+        const { data: existingRecords, error: checkError } = await existingQuery;
 
         if (checkError) { 
             console.error("Error al verificar documento existente:", checkError);
@@ -253,10 +266,16 @@ export default async function handler(req, res) {
         if (existingRecord) {
             console.log(`¡DOCUMENTO DETECTADO! ${dataToInsert.numero_documento} ya existe (ID: ${existingRecord.id}). Actualizando...`);
             
-            const { data: updatedData, error: updateError } = await supabase
+            let updateQuery = supabase
                 .from('registros_formulario')
                 .update(dataToInsert)
                 .eq('numero_documento', dataToInsert.numero_documento);
+
+            if (dataToInsert.tipo_documento) {
+                updateQuery = updateQuery.eq('tipo_documento', dataToInsert.tipo_documento);
+            }
+
+            const { data: updatedData, error: updateError } = await updateQuery;
 
             if (updateError) {
                 console.error("Error al actualizar en Supabase:", updateError);
