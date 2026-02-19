@@ -9,36 +9,28 @@ function normalizeDocumentNumber(value) {
     return value.trim().replace(/[.\-\s]/g, '');
 }
 
-function normalizeDocumentType(value) {
-    if (!value || typeof value !== 'string') return '';
-    const cleaned = value
-        .trim()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .toUpperCase()
-        .replace(/[^A-Z0-9]/g, '');
-
-    if (cleaned === 'CC' || cleaned.includes('CEDULADECIUDADANIA')) return 'CC';
-    if (cleaned === 'CE' || cleaned.includes('CEDULADEEXTRANJERIA')) return 'CE';
-    if (cleaned === 'PEP' || cleaned.includes('PERMISOESPECIALDEPERMANENCIA')) return 'PEP';
-    return cleaned;
-}
-
 function buildLooseLikePattern(doc) {
     return `%${doc.split('').join('%')}%`;
 }
 
-function pickMatchingRecord(records, numeroDocumentoNormalizado, tipoDocumentoNormalizado) {
+function pickMatchingRecord(records, numeroDocumentoNormalizado) {
     if (!Array.isArray(records) || records.length === 0) return null;
 
-    return records.find((row) => {
+    const matches = records.filter((row) => {
         const rowDoc = normalizeDocumentNumber(row.numero_documento || '');
-        if (rowDoc !== numeroDocumentoNormalizado) return false;
+        return rowDoc === numeroDocumentoNormalizado;
+    });
 
-        if (!tipoDocumentoNormalizado) return true;
-        const rowType = normalizeDocumentType(row.tipo_documento || '');
-        return rowType === tipoDocumentoNormalizado;
-    }) || null;
+    if (matches.length === 0) return null;
+
+    matches.sort((a, b) => {
+        const aTime = new Date(a.created_at || 0).getTime();
+        const bTime = new Date(b.created_at || 0).getTime();
+        if (aTime !== bTime) return bTime - aTime;
+        return (b.id || 0) - (a.id || 0);
+    });
+
+    return matches[0];
 }
 
 function limpiarCacheExpirado() {
@@ -104,8 +96,7 @@ export default async function handler(req, res) {
     }
 
     try {
-        const { numero_documento, tipo_documento } = req.body;
-        const tipoDocumentoNormalizado = normalizeDocumentType(tipo_documento);
+        const { numero_documento } = req.body;
         const numeroDocumentoNormalizado = normalizeDocumentNumber(numero_documento);
         
         if (!numeroDocumentoNormalizado) {
@@ -115,7 +106,7 @@ export default async function handler(req, res) {
         }
 
         // Verificar caché
-        const cacheKey = `doc_${tipoDocumentoNormalizado || 'NA'}_${numeroDocumentoNormalizado}`;
+        const cacheKey = `doc_${numeroDocumentoNormalizado}`;
         if (verificacionCache.has(cacheKey)) {
             const cached = verificacionCache.get(cacheKey);
             console.log(`Cache hit para verificación: ${numeroDocumentoNormalizado}`);
@@ -139,8 +130,7 @@ export default async function handler(req, res) {
 
         let existingRecord = pickMatchingRecord(
             exactRecords,
-            numeroDocumentoNormalizado,
-            tipoDocumentoNormalizado
+            numeroDocumentoNormalizado
         );
 
         if (!existingRecord) {
@@ -160,8 +150,7 @@ export default async function handler(req, res) {
 
             existingRecord = pickMatchingRecord(
                 fuzzyRecords,
-                numeroDocumentoNormalizado,
-                tipoDocumentoNormalizado
+                numeroDocumentoNormalizado
             );
         }
         

@@ -108,17 +108,24 @@ function buildLooseLikePattern(doc) {
     return `%${doc.split('').join('%')}%`;
 }
 
-function pickMatchingRecord(records, numeroDocumentoNormalizado, tipoDocumentoNormalizado) {
+function pickMatchingRecord(records, numeroDocumentoNormalizado) {
     if (!Array.isArray(records) || records.length === 0) return null;
 
-    return records.find((row) => {
+    const matches = records.filter((row) => {
         const rowDoc = normalizeDocumentNumber(row.numero_documento || '');
-        if (rowDoc !== numeroDocumentoNormalizado) return false;
+        return rowDoc === numeroDocumentoNormalizado;
+    });
 
-        if (!tipoDocumentoNormalizado) return true;
-        const rowType = normalizeDocumentType(row.tipo_documento || '');
-        return rowType === tipoDocumentoNormalizado;
-    }) || null;
+    if (matches.length === 0) return null;
+
+    matches.sort((a, b) => {
+        const aTime = new Date(a.created_at || 0).getTime();
+        const bTime = new Date(b.created_at || 0).getTime();
+        if (aTime !== bTime) return bTime - aTime;
+        return (b.id || 0) - (a.id || 0);
+    });
+
+    return matches[0];
 }
 
 export default async function handler(req, res) {
@@ -288,11 +295,7 @@ export default async function handler(req, res) {
             });
         }
 
-        let existingRecord = pickMatchingRecord(
-            exactRecords,
-            normalizedNumeroDocumento,
-            normalizedTipoDocumento
-        );
+        let existingRecord = pickMatchingRecord(exactRecords, normalizedNumeroDocumento);
 
         if (!existingRecord) {
             const pattern = buildLooseLikePattern(normalizedNumeroDocumento);
@@ -310,20 +313,21 @@ export default async function handler(req, res) {
                 });
             }
 
-            existingRecord = pickMatchingRecord(
-                fuzzyRecords,
-                normalizedNumeroDocumento,
-                normalizedTipoDocumento
-            );
+            existingRecord = pickMatchingRecord(fuzzyRecords, normalizedNumeroDocumento);
         }
 
         // Si el documento YA EXISTE, hacemos UPDATE en lugar de INSERT
         if (existingRecord) {
             console.log(`¡DOCUMENTO DETECTADO! ${dataToInsert.numero_documento} ya existe (ID: ${existingRecord.id}). Actualizando...`);
+            const dataToUpdate = {
+                ...dataToInsert,
+                // Si ya existía, preserva su tipo de documento original
+                tipo_documento: existingRecord.tipo_documento || dataToInsert.tipo_documento
+            };
             
             const { data: updatedData, error: updateError } = await supabase
                 .from('registros_formulario')
-                .update(dataToInsert)
+                .update(dataToUpdate)
                 .eq('id', existingRecord.id);
 
             if (updateError) {
