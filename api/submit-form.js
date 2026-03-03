@@ -177,26 +177,63 @@ export default async function handler(req, res) {
             privacidad:        data.privacidad === true || data.privacidad === 'true',
         };
 
-        console.log('📤 Datos a insertar en Supabase:', JSON.stringify(dataToInsert, null, 2));
+        console.log('📤 Datos a insertar/actualizar en Supabase:', JSON.stringify(dataToInsert, null, 2));
 
-        const { error: insertError } = await supabase
+        // Buscar si ya existe un registro con ese documento
+        const { data: existing, error: searchError } = await supabase
             .from('registros_formulario')
-            .insert([dataToInsert]);
+            .select('id')
+            .eq('tipo_documento', dataToInsert.tipo_documento)
+            .eq('numero_documento', dataToInsert.numero_documento)
+            .maybeSingle();
 
-        if (insertError) {
-            console.error('❌ Error de Supabase:', insertError);
-            return res.status(500).json({ 
-                message: `Error al guardar: ${insertError.message}${insertError.details ? ' — ' + insertError.details : ''}`,
-                error: insertError.message,
-                details: insertError.details,
-                hint: insertError.hint
-            });
+        if (searchError) {
+            console.error('❌ Error buscando documento existente:', searchError);
         }
 
-        return res.status(200).json({ 
-            message: "¡Datos registrados correctamente! Gracias por actualizar tu información.",
-            action: "created"
-        });
+        if (existing) {
+            // ACTUALIZAR registro existente
+            console.log(`🔄 Documento ya existe (id: ${existing.id}), actualizando...`);
+            const { error: updateError } = await supabase
+                .from('registros_formulario')
+                .update(dataToInsert)
+                .eq('id', existing.id);
+
+            if (updateError) {
+                console.error('❌ Error de Supabase al actualizar:', updateError);
+                return res.status(500).json({
+                    message: `Error al actualizar: ${updateError.message}${updateError.details ? ' — ' + updateError.details : ''}`,
+                    error: updateError.message
+                });
+            }
+
+            return res.status(200).json({
+                message: "¡Información actualizada correctamente! Gracias por mantener tus datos al día.",
+                action: "updated"
+            });
+
+        } else {
+            // INSERTAR nuevo registro
+            console.log('➕ Documento nuevo, insertando...');
+            const { error: insertError } = await supabase
+                .from('registros_formulario')
+                .insert([dataToInsert]);
+
+            if (insertError) {
+                console.error('❌ Error de Supabase al insertar:', insertError);
+                return res.status(500).json({ 
+                    message: `Error al guardar: ${insertError.message}${insertError.details ? ' — ' + insertError.details : ''}`,
+                    error: insertError.message,
+                    details: insertError.details,
+                    hint: insertError.hint
+                });
+            }
+
+            return res.status(200).json({ 
+                message: "¡Datos registrados correctamente! Gracias por actualizar tu información.",
+                action: "created"
+            });
+        }
 
     } catch (error) {
         console.error("❌ Error general al procesar el formulario:", error);
