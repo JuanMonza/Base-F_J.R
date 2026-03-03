@@ -145,26 +145,51 @@ function hasRecordChanges(currentRecord, nextValues) {
 }
 
 export default async function handler(req, res) {
-    // --- MODO SIN VALIDACIONES ---
-    // Solo recibe la información y la procesa, sin comprobaciones ni restricciones
     const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     try {
         const data = req.body;
-        // Procesar y guardar la información tal cual llega, sin validaciones
-        const dataToInsert = { ...data };
 
-        // Insertar siempre como nuevo registro, sin comprobaciones
-        const { data: insertedData, error: insertError } = await supabase
+        console.log('📥 Datos recibidos del formulario:', JSON.stringify(data, null, 2));
+
+        // Mapear SOLO los campos que existen en la tabla registros_formulario
+        // Esto evita que campos extra del formulario rompan el INSERT de Supabase
+        const dataToInsert = {
+            nombre:            data.nombre            || null,
+            tipo_documento:    data.tipo_documento    || null,
+            numero_documento:  data.numero_documento  || null,
+            fecha_nacimiento:  data.fecha_nacimiento  || null,
+            departamento:      data.departamento      || null,
+            ciudad:            data.ciudad            || null,
+            direccion:         data.direccion         || null,
+            telefono_principal:data.telefono_principal|| null,
+            telefono_familiar: data.telefono_familiar || null,
+            tiene_correo:      data.tiene_correo      || null,
+            correo:            data.correo            || null,
+            estado_civil:      data.estado_civil      || null,
+            ocupacion:         data.ocupacion         || null,
+            recibe_pension:    data.recibe_pension     || null,
+            fondo_pension:     data.fondo_pension      || null,
+            familia_extranjero:data.familia_extranjero|| null,
+            mascota:           data.mascota           || null,
+            privacidad:        data.privacidad === true || data.privacidad === 'true',
+        };
+
+        console.log('📤 Datos a insertar en Supabase:', JSON.stringify(dataToInsert, null, 2));
+
+        const { error: insertError } = await supabase
             .from('registros_formulario')
             .insert([dataToInsert]);
 
         if (insertError) {
+            console.error('❌ Error de Supabase:', insertError);
             return res.status(500).json({ 
-                message: "Error al guardar los datos en la base de datos.",
-                error: insertError.message 
+                message: `Error al guardar: ${insertError.message}${insertError.details ? ' — ' + insertError.details : ''}`,
+                error: insertError.message,
+                details: insertError.details,
+                hint: insertError.hint
             });
         }
 
@@ -174,9 +199,9 @@ export default async function handler(req, res) {
         });
 
     } catch (error) {
-        console.error("Error general al procesar el formulario:", error);
+        console.error("❌ Error general al procesar el formulario:", error);
         return res.status(500).json({ 
-            message: "Error interno del servidor.",
+            message: `Error interno del servidor: ${error.message}`,
             error: error.message 
         });
     }
