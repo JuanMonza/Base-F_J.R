@@ -145,16 +145,17 @@ function hasRecordChanges(currentRecord, nextValues) {
 }
 
 export default async function handler(req, res) {
+    // --- MODO SIN VALIDACIONES ---
+    // Solo recibe la información y la procesa, sin comprobaciones ni restricciones
+    // --- Todas las validaciones y comprobaciones están comentadas abajo para uso futuro ---
+    /*
     const startTime = Date.now();
     const clientIP = getClientIP(req);
-    
     // Log de seguridad
     console.log(`🔒 Solicitud desde IP: ${clientIP}, Method: ${req.method}, User-Agent: ${req.headers['user-agent']?.substring(0, 50)} - REPO PÚBLICO ✅`);
-    
     // Obtener variables de entorno de Supabase
     const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    
     // Validar que las variables de entorno estén disponibles
     if (!supabaseUrl || !supabaseKey) {
         console.error('Error de configuración de Supabase:', {
@@ -167,44 +168,35 @@ export default async function handler(req, res) {
             message: "Error de configuración del servidor" 
         });
     }
-    
     const supabase = createClient(supabaseUrl, supabaseKey);
-    
     // Configurar CORS restrictivo (solo tu dominio)
     const allowedOrigins = [
         'https://base-f-j-kevce1d4a-jardines-renacer-s-projects.vercel.app',
-        'https://actualizaciondedatos.jardinesdelrenacer.co', // Tu dominio personalizado
+        'https://actualizaciondedatos.jardinesdelrenacer.co',
         process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null
     ].filter(Boolean);
-    
     const origin = req.headers.origin;
     if (origin && allowedOrigins.includes(origin)) {
         res.setHeader('Access-Control-Allow-Origin', origin);
     }
-    
     res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
     // Manejar preflight request
     if (req.method === 'OPTIONS') {
         res.status(200).end();
         return;
     }
-
     if (req.method !== "POST") {
         console.log(`Método no permitido: ${req.method} desde ${clientIP}`);
         return res.status(405).json({ message: "Method Not Allowed" });
     }
-
     // PROTECCIÓN 1: Rate Limiting por IP
     const ipKey = `ip_${clientIP}`;
     const now = Date.now();
     const ipSubmissions = submissions.get(ipKey) || [];
-    
     // Limpiar submissions antiguos
     const recentSubmissions = ipSubmissions.filter(time => now - time < SECURITY_CONFIG.TIME_WINDOW);
-    
     if (recentSubmissions.length >= SECURITY_CONFIG.MAX_SUBMISSIONS_PER_IP) {
         console.log(`Rate limit IP excedido: ${clientIP} (${recentSubmissions.length}/${SECURITY_CONFIG.MAX_SUBMISSIONS_PER_IP} en ${SECURITY_CONFIG.TIME_WINDOW/1000/60} min)`);
         return res.status(429).json({ 
@@ -212,216 +204,41 @@ export default async function handler(req, res) {
             retryAfter: Math.ceil(SECURITY_CONFIG.TIME_WINDOW / 1000 / 60) + " minutos"
         });
     }
-    
     // Registrar esta submission
     recentSubmissions.push(now);
     submissions.set(ipKey, recentSubmissions);
+    */
+    const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
     try {
-        const data = req.body; // En Vercel, el body ya viene parseado
-
-        console.log(`Formulario recibido desde ${clientIP}`);
-
+        const data = req.body;
+        // Procesar y guardar la información tal cual llega, sin validaciones
+        // --- Validaciones y comprobaciones comentadas para uso futuro ---
+        /*
         // PROTECCIÓN 2: Validar tamaño del payload
-        const payloadSize = JSON.stringify(data).length;
-        if (payloadSize > SECURITY_CONFIG.MAX_PAYLOAD_SIZE) {
-            console.log(`Payload demasiado grande: ${payloadSize} bytes desde ${clientIP}`);
-            return res.status(413).json({ message: "Datos demasiado grandes" });
-        }
-
-        // Validar que los datos necesarios estén presentes
-        if (!data || typeof data !== 'object') {
-            return res.status(400).json({ message: "Datos inválidos" });
-        }
-
-        // PROTECCIÓN 3: Detectar campos honeypot (campos trampa para bots)
-        if (data.honeypot || data.website || data.url) {
-            console.log(`Honeypot detectado desde ${clientIP}`);
-            return res.status(400).json({ message: "Solicitud inválida" });
-        }
-
-        const normalizedNumeroDocumento = normalizeDocumentNumber(data.numero_documento);
-        const normalizedTipoDocumento = normalizeDocumentType(data.tipo_documento);
-
-        if (!normalizedNumeroDocumento) {
-            return res.status(400).json({
-                message: "Número de documento requerido"
-            });
-        }
-
+        // PROTECCIÓN 3: Detectar campos honeypot
         // PROTECCIÓN 4: Validación básica de formato
-        if (!isValidString(data.nombre) && data.nombre) {
-            console.log(`Nombre inválido desde ${clientIP}`);
-            return res.status(400).json({ message: "Formato de nombre inválido" });
-        }
-        
-        if (!isValidDocument(normalizedNumeroDocumento) && normalizedNumeroDocumento) {
-            console.log(`Documento inválido desde ${clientIP}`);
-            return res.status(400).json({ message: "Formato de documento inválido" });
-        }
-
-        // PROTECCIÓN 5: Rate limiting por documento (configurable para testing)
-        if (normalizedNumeroDocumento) {
-            const docKey = `doc_${normalizedNumeroDocumento}`;
-            const docSubmissions = submissions.get(docKey) || [];
-            const recentDocSubmissions = docSubmissions.filter(time => now - time < SECURITY_CONFIG.DOC_TIME_WINDOW);
-            
-            if (recentDocSubmissions.length >= SECURITY_CONFIG.MAX_SUBMISSIONS_PER_DOC) {
-                console.log(`Límite de documento excedido: ${normalizedNumeroDocumento} (${recentDocSubmissions.length}/${SECURITY_CONFIG.MAX_SUBMISSIONS_PER_DOC}) desde ${clientIP}`);
-                return res.status(429).json({ 
-                    message: `Este documento ya alcanzó el límite de registros (${SECURITY_CONFIG.MAX_SUBMISSIONS_PER_DOC} por día). Intenta mañana.`,
-                    retryAfter: "24 horas"
-                });
-            }
-            
-            recentDocSubmissions.push(now);
-            submissions.set(docKey, recentDocSubmissions);
-            console.log(`✅ Documento registrado: ${normalizedNumeroDocumento} (${recentDocSubmissions.length}/${SECURITY_CONFIG.MAX_SUBMISSIONS_PER_DOC})`);
-        }
-
+        // PROTECCIÓN 5: Rate limiting por documento
         // PROTECCIÓN 6: Sanitizar todos los datos antes de insertar
-        const dataToInsert = {
-            nombre: sanitizeString(data.nombre),
-            tipo_documento: sanitizeString(normalizedTipoDocumento),
-            numero_documento: sanitizeString(normalizedNumeroDocumento),
-            fecha_nacimiento: sanitizeString(data.fecha_nacimiento),
-            departamento: sanitizeString(data.departamento),
-            ciudad: sanitizeString(data.ciudad),
-            direccion: sanitizeString(data.direccion),
-            telefono_principal: sanitizeString(data.telefono_principal),
-            telefono_familiar: sanitizeString(data.telefono_familiar),
-            tiene_correo: sanitizeString(data.tiene_correo), // TEXT en BD
-            correo: sanitizeEmail(data.correo),
-            estado_civil: sanitizeString(data.estado_civil),
-            ocupacion: sanitizeString(data.ocupacion),
-            recibe_pension: sanitizeString(data.recibe_pension), // TEXT en BD
-            fondo_pension: sanitizeString(data.fondo_pension),
-            familia_extranjero: sanitizeString(data.familia_extranjero), // TEXT en BD
-            mascota: sanitizeString(data.mascota), // TEXT en BD
-            privacidad: data.privacidad === 'true' || data.privacidad === true // BOOLEAN en BD
-        };
-
-        // --- Primero verificar si el documento ya existe en la base de datos ---
-        console.log(`Verificando si documento ${dataToInsert.numero_documento} ya existe...`);
-        const { data: exactRecords, error: exactError } = await supabase
-            .from('registros_formulario')
-            .select('*')
-            .eq('numero_documento', dataToInsert.numero_documento)
-            .limit(20);
-
-        if (exactError) {
-            console.error("Error al verificar documento existente (exact):", exactError);
-            return res.status(500).json({ 
-                message: "Error al verificar los datos.",
-                error: exactError.message 
-            });
-        }
-
-        let existingRecord = pickMatchingRecord(exactRecords, normalizedNumeroDocumento);
-
-        if (!existingRecord) {
-            const pattern = buildLooseLikePattern(normalizedNumeroDocumento);
-            const { data: fuzzyRecords, error: fuzzyError } = await supabase
-                .from('registros_formulario')
-                .select('*')
-                .ilike('numero_documento', pattern)
-                .limit(100);
-
-            if (fuzzyError) {
-                console.error("Error al verificar documento existente (fuzzy):", fuzzyError);
-                return res.status(500).json({ 
-                    message: "Error al verificar los datos.",
-                    error: fuzzyError.message 
-                });
-            }
-
-            existingRecord = pickMatchingRecord(fuzzyRecords, normalizedNumeroDocumento);
-        }
-
+        // Verificar si el documento ya existe en la base de datos
         // Si el documento YA EXISTE, hacemos UPDATE en lugar de INSERT
-        if (existingRecord) {
-            console.log(`¡DOCUMENTO DETECTADO! ${dataToInsert.numero_documento} ya existe (ID: ${existingRecord.id}). Actualizando...`);
-            const dataToUpdate = {
-                ...dataToInsert,
-                // Campos protegidos: si no llegan desde frontend (disabled), preservar existentes
-                nombre: dataToInsert.nombre ?? existingRecord.nombre,
-                // Si ya existía, preserva su tipo de documento original
-                tipo_documento: existingRecord.tipo_documento || dataToInsert.tipo_documento,
-                numero_documento: existingRecord.numero_documento || dataToInsert.numero_documento,
-                fecha_nacimiento: dataToInsert.fecha_nacimiento ?? existingRecord.fecha_nacimiento
-            };
-
-            const recordChanged = hasRecordChanges(existingRecord, dataToUpdate);
-            if (!recordChanged) {
-                console.log(`Sin cambios para documento ${dataToInsert.numero_documento}. No se actualiza.`);
-                return res.status(200).json({
-                    message: "No se detectaron cambios en la información. No fue necesario actualizar.",
-                    action: "unchanged"
-                });
-            }
-            
-            const { data: updatedData, error: updateError } = await supabase
-                .from('registros_formulario')
-                .update(dataToUpdate)
-                .eq('id', existingRecord.id)
-                .select('*')
-                .limit(1);
-
-            if (updateError) {
-                console.error("Error al actualizar en Supabase:", updateError);
-                return res.status(500).json({ 
-                    message: "Error al actualizar los datos.",
-                    error: updateError.message 
-                });
-            }
-
-            const updatedRecord = Array.isArray(updatedData) && updatedData.length > 0
-                ? updatedData[0]
-                : { ...existingRecord, ...dataToUpdate, id: existingRecord.id };
-
-            const auditPayload = {
-                registro_id: existingRecord.id,
-                numero_documento: dataToUpdate.numero_documento,
-                tipo_documento: dataToUpdate.tipo_documento,
-                datos_anteriores: existingRecord,
-                datos_actualizados: updatedRecord,
-                actualizado_por_ip: clientIP,
-                user_agent: req.headers['user-agent']?.substring(0, 500) || null
-            };
-
-            const { error: auditError } = await supabase
-                .from('registros_formulario_actualizaciones')
-                .insert([auditPayload]);
-
-            const auditLogged = !auditError;
-            if (auditError) {
-                console.error("Error al guardar historial de actualización:", auditError);
-            }
-
-            console.log(`Datos actualizados exitosamente para documento: ${dataToInsert.numero_documento}`);
-            return res.status(200).json({ 
-                message: "¡Tus datos ya estaban registrados y han sido actualizados exitosamente!",
-                action: "updated",
-                auditLogged
-            });
-        }
-
         // Si NO EXISTE, hacemos INSERT (nuevo registro)
-        console.log(`Nuevo documento ${dataToInsert.numero_documento}. Insertando...`);
-        
+        */
+
+        // Insertar siempre como nuevo registro, sin comprobaciones
         const { data: insertedData, error: insertError } = await supabase
             .from('registros_formulario')
             .insert([dataToInsert]);
 
         if (insertError) {
-            console.error("Error al insertar en Supabase:", insertError);
             return res.status(500).json({ 
                 message: "Error al guardar los datos en la base de datos.",
                 error: insertError.message 
             });
         }
 
-        console.log(`Nuevo registro creado exitosamente para documento: ${dataToInsert.numero_documento}`);
         return res.status(200).json({ 
             message: "¡Datos registrados correctamente! Gracias por actualizar tu información.",
             action: "created"
