@@ -147,67 +147,6 @@ function hasRecordChanges(currentRecord, nextValues) {
 export default async function handler(req, res) {
     // --- MODO SIN VALIDACIONES ---
     // Solo recibe la información y la procesa, sin comprobaciones ni restricciones
-    // --- Todas las validaciones y comprobaciones están comentadas abajo para uso futuro ---
-    /*
-    const startTime = Date.now();
-    const clientIP = getClientIP(req);
-    // Log de seguridad
-    console.log(`🔒 Solicitud desde IP: ${clientIP}, Method: ${req.method}, User-Agent: ${req.headers['user-agent']?.substring(0, 50)} - REPO PÚBLICO ✅`);
-    // Obtener variables de entorno de Supabase
-    const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    // Validar que las variables de entorno estén disponibles
-    if (!supabaseUrl || !supabaseKey) {
-        console.error('Error de configuración de Supabase:', {
-            supabaseUrl: !!supabaseUrl,
-            supabaseServiceRoleKey: !!supabaseKey,
-            env_SUPABASE_URL: !!process.env.SUPABASE_URL,
-            env_SUPABASE_SERVICE_ROLE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY
-        });
-        return res.status(500).json({ 
-            message: "Error de configuración del servidor" 
-        });
-    }
-    const supabase = createClient(supabaseUrl, supabaseKey);
-    // Configurar CORS restrictivo (solo tu dominio)
-    const allowedOrigins = [
-        'https://base-f-j-kevce1d4a-jardines-renacer-s-projects.vercel.app',
-        'https://actualizaciondedatos.jardinesdelrenacer.co',
-        process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null
-    ].filter(Boolean);
-    const origin = req.headers.origin;
-    if (origin && allowedOrigins.includes(origin)) {
-        res.setHeader('Access-Control-Allow-Origin', origin);
-    }
-    res.setHeader('Access-Control-Allow-Credentials', true);
-    res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    // Manejar preflight request
-    if (req.method === 'OPTIONS') {
-        res.status(200).end();
-        return;
-    }
-    if (req.method !== "POST") {
-        console.log(`Método no permitido: ${req.method} desde ${clientIP}`);
-        return res.status(405).json({ message: "Method Not Allowed" });
-    }
-    // PROTECCIÓN 1: Rate Limiting por IP
-    const ipKey = `ip_${clientIP}`;
-    const now = Date.now();
-    const ipSubmissions = submissions.get(ipKey) || [];
-    // Limpiar submissions antiguos
-    const recentSubmissions = ipSubmissions.filter(time => now - time < SECURITY_CONFIG.TIME_WINDOW);
-    if (recentSubmissions.length >= SECURITY_CONFIG.MAX_SUBMISSIONS_PER_IP) {
-        console.log(`Rate limit IP excedido: ${clientIP} (${recentSubmissions.length}/${SECURITY_CONFIG.MAX_SUBMISSIONS_PER_IP} en ${SECURITY_CONFIG.TIME_WINDOW/1000/60} min)`);
-        return res.status(429).json({ 
-            message: "Demasiadas solicitudes desde tu IP. Intenta de nuevo más tarde.",
-            retryAfter: Math.ceil(SECURITY_CONFIG.TIME_WINDOW / 1000 / 60) + " minutos"
-        });
-    }
-    // Registrar esta submission
-    recentSubmissions.push(now);
-    submissions.set(ipKey, recentSubmissions);
-    */
     const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -215,17 +154,7 @@ export default async function handler(req, res) {
     try {
         const data = req.body;
         // Procesar y guardar la información tal cual llega, sin validaciones
-        // --- Validaciones y comprobaciones comentadas para uso futuro ---
-        /*
-        // PROTECCIÓN 2: Validar tamaño del payload
-        // PROTECCIÓN 3: Detectar campos honeypot
-        // PROTECCIÓN 4: Validación básica de formato
-        // PROTECCIÓN 5: Rate limiting por documento
-        // PROTECCIÓN 6: Sanitizar todos los datos antes de insertar
-        // Verificar si el documento ya existe en la base de datos
-        // Si el documento YA EXISTE, hacemos UPDATE en lugar de INSERT
-        // Si NO EXISTE, hacemos INSERT (nuevo registro)
-        */
+        const dataToInsert = { ...data };
 
         // Insertar siempre como nuevo registro, sin comprobaciones
         const { data: insertedData, error: insertError } = await supabase

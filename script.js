@@ -26,9 +26,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // const consultaNumeroDoc = document.getElementById("consulta_numero_documento");
     // const consultaResultado = document.getElementById("consulta-resultado");
 
-    // --- NUEVO: BOTÓN CONSULTAR DOCUMENTO ---
+    // --- BOTÓN CONSULTAR DOCUMENTO (COMENTADO PARA USO FUTURO) ---
     // const btnConsultarDocumento = document.getElementById("btn-consultar-documento");
-    const resultadoConsultaDoc = document.getElementById("resultado-consulta-doc");
+    // const resultadoConsultaDoc = document.getElementById("resultado-consulta-doc");
     const tipoDocumentoSelect = document.getElementById('tipo_documento');
     const numeroDocumentoInput = document.getElementById('numero_documento');
     const nombreInput = document.getElementById('nombre');
@@ -175,17 +175,95 @@ const colombianLocations = {
         event.target.value = event.target.value.replace(/[^0-9]/g, '');
     };
 
-    // ===== NUEVO: BOTÓN CONSULTAR DOCUMENTO =====
-    /*
+    /* ===== BOTÓN CONSULTAR DOCUMENTO (COMENTADO PARA USO FUTURO) =====
     if (btnConsultarDocumento) {
         btnConsultarDocumento.addEventListener('click', async () => {
-            // ...lógica de consulta comentada para uso futuro...
+            const numeroDoc = numeroDocumentoInput.value.trim();
+            const tipoDoc = tipoDocumentoSelect.value;
+
+            // Validaciones
+            if (!tipoDoc) {
+                mostrarResultadoConsulta('⚠️ Por favor selecciona el tipo de documento', 'warning');
+                return;
+            }
+
+            if (!numeroDoc || numeroDoc.length < 5) {
+                mostrarResultadoConsulta('⚠️ Por favor ingresa un número de documento válido', 'warning');
+                return;
+            }
+
+            // Deshabilitar botón y mostrar loading
+            btnConsultarDocumento.disabled = true;
+            btnConsultarDocumento.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Consultando...';
+
+            try {
+                console.log(`🔍 Consultando documento: ${tipoDoc} ${numeroDoc}`);
+                
+                const response = await fetch('/api/verificar-documento', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        numero_documento: numeroDoc,
+                        tipo_documento: tipoDoc
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al consultar el documento');
+                }
+
+                const data = await response.json();
+                console.log('📊 Resultado de consulta:', data);
+
+                if (data.exists && data.data) {
+                    // ✅ DOCUMENTO EXISTE - Autocompletar y bloquear campos protegidos
+                    console.log(`✅ Documento encontrado: ${data.data.nombre}`);
+                    mostrarResultadoConsulta(
+                        `✅ <strong>Tus datos ya están registrados.</strong><br>
+                        <span style='color:#155724;'>Solo puedes actualizar los campos permitidos.<br>Los campos principales están bloqueados por seguridad.</span><br>
+                        <b>Nombre:</b> ${data.data.nombre || ''}<br>
+                        <b>Tipo de documento:</b> ${data.data.tipo_documento || ''}<br>
+                        <b>Número de documento:</b> ${data.data.numero_documento || ''}<br>
+                        <b>Fecha de nacimiento:</b> ${data.data.fecha_nacimiento || ''}`,
+                        'success'
+                    );
+                    // Autocompletar todos los campos
+                    autocompletarFormularioCompleto(data.data);
+                    // Bloquear solo los campos protegidos
+                    bloquearCamposProtegidos(true);
+                } else {
+                    // ℹ️ DOCUMENTO NO EXISTE - Permitir llenar todo
+                    console.log(`ℹ️ Documento ${numeroDoc} no encontrado - formulario nuevo`);
+                    mostrarResultadoConsulta(
+                        'ℹ️ Documento no encontrado. Puedes llenar el formulario para registrarte.',
+                        'info'
+                    );
+                    
+                    // Limpiar formulario (excepto tipo y número de documento)
+                    limpiarFormularioParcial();
+                    
+                    // Desbloquear todos los campos
+                    bloquearCamposProtegidos(false);
+                }
+
+            } catch (error) {
+                console.error('❌ Error al consultar documento:', error);
+                mostrarResultadoConsulta(
+                    '❌ Error al consultar el documento. Intenta nuevamente.',
+                    'error'
+                );
+            } finally {
+                // Restaurar botón
+                btnConsultarDocumento.disabled = false;
+                btnConsultarDocumento.innerHTML = '<i class="fas fa-search"></i> Consultar';
+            }
         });
     }
-    */
-    }
+    ===== FIN: BOTÓN CONSULTAR DOCUMENTO ===== */
 
-    // Función para bloquear campos protegidos (nombre, documento, fecha nacimiento)
+    /* Función para bloquear campos protegidos - COMENTADO PARA USO FUTURO
     const bloquearCamposProtegidos = (bloquear) => {
         const camposProtegidos = [
             nombreInput,
@@ -209,8 +287,9 @@ const colombianLocations = {
 
         console.log(`🔒 Campos protegidos ${bloquear ? 'BLOQUEADOS' : 'DESBLOQUEADOS'}`);
     };
+    */
 
-    // Función para mostrar resultado de la consulta
+    /* Función para mostrar resultado de la consulta - COMENTADO PARA USO FUTURO
     const mostrarResultadoConsulta = (mensaje, tipo) => {
         if (!resultadoConsultaDoc) return;
 
@@ -231,8 +310,9 @@ const colombianLocations = {
 
         resultadoConsultaDoc.style.display = 'block';
     };
+    */
 
-    // Función para limpiar formulario parcialmente (mantener tipo y número de documento)
+    /* Función para limpiar formulario parcialmente - COMENTADO PARA USO FUTURO
     const limpiarFormularioParcial = () => {
         const camposAMantener = ['numero_documento', 'tipo_documento'];
         
@@ -249,6 +329,7 @@ const colombianLocations = {
         
         console.log('🧹 Formulario limpiado parcialmente');
     };
+    */
 
     // ===== CONSULTA AUTOMÁTICA CON VERIFIK Y VERIFICACIÓN EN BD (DESACTIVADA) =====
     let consultaTimeout = null;
@@ -869,20 +950,14 @@ const colombianLocations = {
         data.numero_documento = numeroDocumentoInput?.value || data.numero_documento || '';
         data.fecha_nacimiento = fechaNacimientoInput?.value || data.fecha_nacimiento || '';
 
-        // Asegurarse de que los checkboxes y selects envíen valores booleanos (true/false)
+        // privacidad es BOOLEAN en la BD → se envía como booleano
         data.privacidad = formData.has('privacidad');
-        data.familia_extranjero = (formData.get('familia_extranjero') === 'Si');
-        data.mascota = (formData.get('mascota') === 'Si');
-        data.tiene_correo = (formData.get('tiene_correo') === 'Si');
 
-        // Procesar recibe_pension como booleano solo para 'Si' y 'No'
-        if (formData.get('recibe_pension') === 'Si') {
-            data.recibe_pension = true;
-        } else if (formData.get('recibe_pension') === 'No') {
-            data.recibe_pension = false;
-        } else {
-            data.recibe_pension = formData.get('recibe_pension'); // En trámite, Sustitución pensional, etc.
-        }
+        // Los siguientes campos son TEXT en la BD → se envían como 'Si' / 'No' (o el valor del select)
+        data.tiene_correo = formData.get('tiene_correo') || '';
+        data.familia_extranjero = formData.get('familia_extranjero') || '';
+        data.mascota = formData.get('mascota') || '';
+        data.recibe_pension = formData.get('recibe_pension') || '';
 
         try {
             // Enviar los datos a la función de Vercel
